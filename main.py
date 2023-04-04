@@ -1,3 +1,7 @@
+import os
+import threading
+from time import sleep
+
 import customtkinter
 from PIL import ImageTk, Image, ImageEnhance
 import math
@@ -30,7 +34,6 @@ exit_icon_pi = ImageTk.PhotoImage(exit_icon)
 exit_button = customtkinter.CTkButton(master=topframe, text="", image=exit_icon_pi, width=30, height=90, command=exit, bg_color='#3f9ae0', fg_color='#3f9ae0')
 exit_button.pack(side="top", anchor="ne")
 
-
 title = customtkinter.CTkLabel(master=topframe, text="OVERDATA V2.1", font=customtkinter.CTkFont(family="BankSansEFCY-Bol", size=29), text_color='#ffffff')
 title.place(x=(1920 / 2) - 120, y=30)
 
@@ -38,13 +41,13 @@ left_sidebar_frame = customtkinter.CTkFrame(master=root, bg_color='#3f9ae0', fg_
 left_sidebar_frame.pack(side="left", fill="both")
 left_sidebar_frame.configure(width=140, height=1200)
 
-match_button = customtkinter.CTkButton(master=left_sidebar_frame, text_color='#ffffff', text="MATCH SUMMARY", command=MatchPage, width=140,font=customtkinter.CTkFont(family="BankSansEFCY-RegCon", size=14))
+match_button = customtkinter.CTkButton(master=left_sidebar_frame, text_color='#ffffff', text="MATCH SUMMARY", command=MatchPage, width=140,font=customtkinter.CTkFont(family="BankSansEFCY-LigCon", size=14))
 match_button.place(y=10)
 
-data_button = customtkinter.CTkButton(master=left_sidebar_frame, text_color='#ffffff', text="PLAYER COMPARISON", command=DataPage, width=140,font=customtkinter.CTkFont(family="BankSansEFCY-RegCon", size=14))
+data_button = customtkinter.CTkButton(master=left_sidebar_frame, text_color='#ffffff', text="PLAYER COMPARISON", command=DataPage, width=140,font=customtkinter.CTkFont(family="BankSansEFCY-LigCon", size=14))
 data_button.place(y=45)
 
-data_button = customtkinter.CTkButton(master=left_sidebar_frame, text_color='#ffffff', text="DATA BANK", command=DataPage, width=140, font=customtkinter.CTkFont(family="BankSansEFCY-RegCon", size=14))
+data_button = customtkinter.CTkButton(master=left_sidebar_frame, text_color='#ffffff', text="DATA BANK", command=DataPage, width=140, font=customtkinter.CTkFont(family="BankSansEFCY-LigCon", size=14))
 data_button.place(y=80)
 
 
@@ -142,7 +145,8 @@ class Match:
                     self.match_stats["Push Bot Z Position"].append(split[4][1:-3])
 
         # Creating each player object for the match based on username from the second log line
-        players_line_split = self.read[1].split(",")
+        self.new_line = self.read[1].replace("0", "")
+        players_line_split = self.new_line.split(",")
         self.team1player1 = Player(players_line_split[0].split(" ")[1])
         self.team1player2 = Player(players_line_split[1])
         self.team1player3 = Player(players_line_split[2])
@@ -230,14 +234,18 @@ class Player:
 
 def CreatePlayerIconGUI(icon_size_x, icon_size_y, starting_x, starting_y, left_align, vertical_slot, playerName, heroes, displayPlaytimeBar, icon_type):
     top3 = FindTop3(heroes)
+
+    if len(top3) < 3:
+        for i in range(3-len(top3)):
+            top3.append("")
+
     index = 0
     playtimeBarPadding = 1
     if displayPlaytimeBar:
         playtimeBarPadding = 1.2
 
     for hero in top3:
-        icon = customtkinter.CTkLabel(master=frame, image=FetchHeroIcon(hero, 0, 0, 0, 0, icon_type, sizex=icon_size_x,
-                                                                        sizey=icon_size_y), text="")
+        icon = customtkinter.CTkLabel(master=frame, image=FetchHeroIcon(hero, 0, 0, 0, 0, icon_type, sizex=icon_size_x, sizey=icon_size_y), text="")
         if left_align:
             icon_x_pos = 0 + starting_x + (index * icon_size_x)
             icon_y_pos = 0 + starting_y + (vertical_slot * icon_size_y * playtimeBarPadding)
@@ -247,16 +255,35 @@ def CreatePlayerIconGUI(icon_size_x, icon_size_y, starting_x, starting_y, left_a
             icon_y_pos = 0 + starting_y + (vertical_slot * icon_size_y * playtimeBarPadding)
             icon.place(x=icon_x_pos, y=icon_y_pos)
 
-        if displayPlaytimeBar:
+        if displayPlaytimeBar and hero != "":
             proportion_of_hero_played = ProportionOfHeroPlayed(heroes, hero)
             round_proportion = round(proportion_of_hero_played * icon_size_x)
             if round_proportion < 1:
                 round_proportion = 1
-            playtimeBar = customtkinter.CTkLabel(master=frame, text="",
-                                                 image=FetchHeroColour(hero, round_proportion, 10), height=10,
-                                                 width=round_proportion)
+            playtimeBar = customtkinter.CTkLabel(master=frame, text="", image=FetchHeroColour(hero, round_proportion, 10), height=10, width=round_proportion)
             playtimeBar.place(x=icon_x_pos, y=icon_y_pos + icon_size_y)
         index += 1
+
+    player_name_label = customtkinter.CTkLabel(master=frame, text=playerName.upper(), font=customtkinter.CTkFont(family="BankSansEFCY-Bol", size=14), text_color='#424366')
+    if left_align:
+        label_x = 0 + starting_x + ((index+0.2) * icon_size_x)
+        label_y = 0 + starting_y + (vertical_slot * icon_size_y * playtimeBarPadding) + icon_size_y/3
+        player_name_label.place(x=label_x, y=label_y)
+    else:
+        label_x = 1660 - icon_size_x - ((index+0.6) * icon_size_x) + starting_x
+        label_y = 0 + starting_y + (vertical_slot * icon_size_y * playtimeBarPadding) + icon_size_y/3
+        player_name_label.place(x=label_x, y=label_y)
+
+
+def CreateMatchGUI(icon_size_x, icon_size_y, starting_x, starting_y, match, displayPlaytimeBar, icon_type):
+    for index, player in enumerate(match.players):
+        if index < 5:
+            left_align = True
+            vertical_slot = index
+        else:
+            left_align = False
+            vertical_slot = index-5
+        CreatePlayerIconGUI(icon_size_x, icon_size_y, starting_x, starting_y, left_align, vertical_slot, player.player_stats["Player Name"], ParseHeroPlaytimeData(player), displayPlaytimeBar, icon_type)
 
 
 def ProportionOfHeroPlayed(heroes, hero):
@@ -342,12 +369,35 @@ t1p1_heroes = ParseHeroPlaytimeData(morning_combined_player_object)
 # Above it automatically parses the data for THAT MATCH (match 3), since each match has its own of this player object and match3.player is a unique playerObject which is passed in
 t2p1_heroes = ParseHeroPlaytimeData(coronet_combined_player_object)
 
-CreatePlayerIconGUI(60, 60, 0, 0, True, 0, match3.team1player1.player_stats["Player Name"], t1p1_heroes, True, "Silhouette")
-CreatePlayerIconGUI(60, 60, 0, 0, False, 0, match1.team2player1.player_stats["Player Name"], t2p1_heroes, True, "Silhouette")
+# CreatePlayerIconGUI(60, 60, 0, 0, True, 0, match3.team1player1.player_stats["Player Name"], t1p1_heroes, True, "Silhouette")
+# CreatePlayerIconGUI(60, 60, 0, 0, False, 0, match1.team2player1.player_stats["Player Name"], t2p1_heroes, True, "Silhouette")
+
+drop_down_frame = customtkinter.CTkFrame(master=topframe, bg_color="#4D6394", fg_color="#4D6394", height=30, width=900)
+drop_down_frame.place(x=0,y=0)
+
+selectable_stat = customtkinter.StringVar(frame)
+selectable_stat.set("Player Name")
+drop_down_options = ["Player Name", "Hero Damage Dealt"]
+drop_down_1 = customtkinter.CTkOptionMenu(master=topframe, variable=selectable_stat, values=drop_down_options, font=customtkinter.CTkFont(family="BankSansEFCY-LigCon", size=15), width=160)
+drop_down_1.place(x=385,y=58)
+
+selectable_logs = customtkinter.StringVar(frame)
+log_options = os.listdir('Logs/')
+selectable_logs.set(log_options[0])
+log_drop_down = customtkinter.CTkOptionMenu(master=topframe, variable=selectable_logs, values=log_options, font=customtkinter.CTkFont(family="BankSansEFCY-LigCon", size=15), width=160)
+log_drop_down.place(x=0,y=58)
+
+CreateMatchGUI(60, 60, 0, 0, Match(selectable_logs.get()), True, "Silhouette")
+
+root.mainloop()
+
+
+
+
 
 # t1p2_heroes = {"Reinhardt":90}
 # CreatePlayerNameAndIconGUI(60, 60, 0, 0, True, 1, "Bob", t1p2_heroes, True)
 
 # CreatePlayerNameAndIconGUI(60, 60, 0, 0, False, 1, "Stewart", "Zarya", 1)
 
-root.mainloop()
+
