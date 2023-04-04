@@ -269,11 +269,11 @@ def CreatePlayerIconGUI(icon_size_x, icon_size_y, starting_x, starting_y, left_a
     for _index, stat in enumerate(displayed_stats):
         player_name_label = customtkinter.CTkLabel(master=frame, text=stat.upper(), font=customtkinter.CTkFont(family="BankSansEFCY-Bol", size=14), text_color='#424366')
         if left_align:
-            label_x = 0 + starting_x + ((index+0.2) * icon_size_x) + ((_index+5) * icon_size_x)
+            label_x = 0 + starting_x + ((index+0.2) * icon_size_x) + ((_index*1.6) * icon_size_x)
             label_y = 0 + starting_y + (vertical_slot * icon_size_y * playtimeBarPadding) + icon_size_y/3
             player_name_label.place(x=label_x, y=label_y)
         else:
-            label_x = 1660 - icon_size_x - ((index+0.6) * icon_size_x) + starting_x - ((_index+5) * icon_size_x)
+            label_x = 1660 - icon_size_x - ((index+0.6) * icon_size_x) + starting_x - ((_index*1.6) * icon_size_x)
             label_y = 0 + starting_y + (vertical_slot * icon_size_y * playtimeBarPadding) + icon_size_y/3
             player_name_label.place(x=label_x, y=label_y)
 
