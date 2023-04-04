@@ -23,7 +23,7 @@ topframe.pack(side="top", fill="both", expand=True)
 frame = customtkinter.CTkFrame(master=root, bg_color="#ffffff", fg_color="#ffffff")
 frame.pack(side="right", pady=50, padx=60, fill="both", expand=True)
 
-label = customtkinter.CTkLabel(master=topframe, text="OVERSTAT V2.1",
+label = customtkinter.CTkLabel(master=topframe, text="OVERDATA V2.1",
                                font=customtkinter.CTkFont(family="BankSansEFCY-Bol", size=29), text_color='#ffffff')
 label.place(x=(1920 / 2) - 120, y=30)
 
@@ -44,8 +44,8 @@ data_button = customtkinter.CTkButton(master=left_sidebar_frame, text_color='#ff
 data_button.place(y=80)
 
 
-def FetchHeroIcon(heroName, crop_x_left, crop_x_right, crop_y_top, crop_y_bottom, sizex=50, sizey=50):
-    portrait3d = Image.open("3D_Hero_Icons/Icon-" + heroName + ".png")
+def FetchHeroIcon(heroName, crop_x_left, crop_x_right, crop_y_top, crop_y_bottom, icon_type, sizex=50, sizey=50):
+    portrait3d = Image.open(icon_type + "_Hero_Icons/Icon-" + heroName + ".png")
     portrait3d = portrait3d.resize((sizex, sizey), Image.LANCZOS)
     filter = ImageEnhance.Contrast(portrait3d)
     portrait3d = filter.enhance(0.9)
@@ -228,10 +228,14 @@ class Player:
         self.logs_count += 1
         split_player_log = line.split(",")
         self.match_time_elapsed.append(split_player_log[0].split(" ")[1])
+
         if split_player_log[2] == "LÃºcio" or split_player_log[2] == "Lúcio" or split_player_log[2] == "Lucio":
             self.hero.append("Lucio")
+        elif split_player_log[2] == "Soldier:76":
+            self.hero.append("Soldier 76")
         else:
             self.hero.append(split_player_log[2])
+
         self.h_dmg_dealt.append(split_player_log[3])
         self.b_dmg_dealt.append(split_player_log[4])
         self.dmg_mitigated.append(split_player_log[5])
@@ -262,7 +266,7 @@ class Player:
         self.health_type_shields.append(split_player_log[30])
 
 
-def CreatePlayerNameAndIconGUI(icon_size_x, icon_size_y, starting_x, starting_y, left_align, vertical_slot, playerName, heroes, displayPlaytimeBar):
+def CreatePlayerNameAndIconGUI(icon_size_x, icon_size_y, starting_x, starting_y, left_align, vertical_slot, playerName, heroes, displayPlaytimeBar, icon_type):
     top3 = FindTop3(heroes)
     index = 0
     playtimeBarPadding = 1
@@ -270,9 +274,7 @@ def CreatePlayerNameAndIconGUI(icon_size_x, icon_size_y, starting_x, starting_y,
         playtimeBarPadding = 1.2
 
     for hero in top3:
-        icon = customtkinter.CTkLabel(master=frame,
-                                      image=FetchHeroIcon(hero, 0, 0, 0, 0, sizex=icon_size_x, sizey=icon_size_y),
-                                      text="")
+        icon = customtkinter.CTkLabel(master=frame,image=FetchHeroIcon(hero, 0, 0, 0, 0, icon_type, sizex=icon_size_x, sizey=icon_size_y),text="")
         if left_align:
             icon_x_pos = 0 + starting_x + (index * icon_size_x)
             icon_y_pos = 0 + starting_y + (vertical_slot * icon_size_y * playtimeBarPadding)
@@ -287,8 +289,7 @@ def CreatePlayerNameAndIconGUI(icon_size_x, icon_size_y, starting_x, starting_y,
             round_proportion = round(proportion_of_hero_played * icon_size_x)
             if round_proportion < 1:
                 round_proportion = 1
-            playtimeBar = customtkinter.CTkLabel(master=frame, text="",
-                                                 image=FetchHeroColour(hero, round_proportion, 10), height=10, width=round_proportion)
+            playtimeBar = customtkinter.CTkLabel(master=frame, text="",image=FetchHeroColour(hero, round_proportion, 10), height=10, width=round_proportion)
             playtimeBar.place(x=icon_x_pos, y=icon_y_pos + icon_size_y)
         index += 1
 
@@ -379,8 +380,8 @@ t2p1_heroes = ParseHeroPlaytimeData(match3.team2player1)
 # Above it automatically parses the data for THAT MATCH (match 3), since each match has its own of this player object and match3.player is a unique playerObject which is passed in
 
 t2p1_heroes = ParseHeroPlaytimeData(coronet_combined_player_object)
-CreatePlayerNameAndIconGUI(60, 60, 0, 0, True, 0, match3.team1player1.playername, t1p1_heroes, True)
-CreatePlayerNameAndIconGUI(60, 60, 0, 0, False, 0, match1.team2player1.playername, t2p1_heroes, True)
+CreatePlayerNameAndIconGUI(60, 60, 0, 0, True, 0, match3.team1player1.playername, t1p1_heroes, True, "Silhouette")
+CreatePlayerNameAndIconGUI(60, 60, 0, 0, False, 0, match1.team2player1.playername, t2p1_heroes, True, "Silhouette")
 
 # t1p2_heroes = {"Reinhardt":90}
 # CreatePlayerNameAndIconGUI(60, 60, 0, 0, True, 1, "Bob", t1p2_heroes, True)
