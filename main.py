@@ -163,17 +163,19 @@ class Match:
 
         # Creating each player object for the match based on username from the second log line
         players_line_split = self.read[1].split(",")
-        self.team1player1 = Player(players_line_split[0].split(" ")[1], self.players)
-        self.team1player2 = Player(players_line_split[1], self.players)
-        self.team1player3 = Player(players_line_split[2], self.players)
-        self.team1player4 = Player(players_line_split[3], self.players)
-        self.team1player5 = Player(players_line_split[4], self.players)
+        self.team1player1 = Player(players_line_split[0].split(" ")[1])
+        self.team1player2 = Player(players_line_split[1])
+        self.team1player3 = Player(players_line_split[2])
+        self.team1player4 = Player(players_line_split[3])
+        self.team1player5 = Player(players_line_split[4])
 
-        self.team2player1 = Player(players_line_split[6], self.players)
-        self.team2player2 = Player(players_line_split[7], self.players)
-        self.team2player3 = Player(players_line_split[8], self.players)
-        self.team2player4 = Player(players_line_split[9], self.players)
-        self.team2player5 = Player(players_line_split[10], self.players)
+        self.team2player1 = Player(players_line_split[6])
+        self.team2player2 = Player(players_line_split[7])
+        self.team2player3 = Player(players_line_split[8])
+        self.team2player4 = Player(players_line_split[9])
+        self.team2player5 = Player(players_line_split[10])
+
+        self.players = [self.team1player1, self.team1player2, self.team1player3, self.team1player4, self.team1player5, self.team2player1, self.team2player2, self.team2player3, self.team2player4, self.team2player5]
 
         # Determining which lines need to be logged and the relevant player object to log them under
         for index, line in enumerate(self.read):
@@ -186,7 +188,7 @@ class Match:
 
 class Player:
 
-    def __init__(self, playername, players):
+    def __init__(self, playername):
         self.match_time_elapsed = []
         self.hero = []
         self.h_dmg_dealt = []
@@ -222,8 +224,6 @@ class Player:
 
         self.playername = playername
 
-        players.append(self)
-
     def AddLog(self, line):
         self.logs_count += 1
         split_player_log = line.split(",")
@@ -232,34 +232,34 @@ class Player:
             self.hero.append("Lucio")
         else:
             self.hero.append(split_player_log[2])
-            self.h_dmg_dealt.append(split_player_log[3])
-            self.b_dmg_dealt.append(split_player_log[4])
-            self.dmg_mitigated.append(split_player_log[5])
-            self.dmg_taken.append(split_player_log[6])
-            self.deaths.append(split_player_log[7])
-            self.eliminations.append(split_player_log[8])
-            self.final_blows.append(split_player_log[9])
-            self.environmental_deaths.append(split_player_log[10])
-            self.environmental_kills.append(split_player_log[11])
-            self.healing_dealt.append(split_player_log[12])
-            self.objective_kills.append(split_player_log[13])
-            self.solo_kills.append(split_player_log[14])
-            self.ultimates_earned.append(split_player_log[15])
-            self.ultimates_used.append(split_player_log[16])
-            self.healing_received.append(split_player_log[17])
-            self.ult_charge_percent.append(split_player_log[18])
-            self.player_closest_to_reticle.append(split_player_log[19])
-            self.x_pos.append(split_player_log[20][1:])
-            self.y_pos.append(split_player_log[21])
-            self.z_pos.append(split_player_log[22][:-1])
-            self.team.append(split_player_log[23])
-            self.ability_1_cd.append(split_player_log[24])
-            self.ability_2_cd.append(split_player_log[25])
-            self.health.append(split_player_log[26])
-            self.max_health.append(split_player_log[27])
-            self.health_type_health.append(split_player_log[28])
-            self.health_type_armour.append(split_player_log[29])
-            self.health_type_shields.append(split_player_log[30])
+        self.h_dmg_dealt.append(split_player_log[3])
+        self.b_dmg_dealt.append(split_player_log[4])
+        self.dmg_mitigated.append(split_player_log[5])
+        self.dmg_taken.append(split_player_log[6])
+        self.deaths.append(split_player_log[7])
+        self.eliminations.append(split_player_log[8])
+        self.final_blows.append(split_player_log[9])
+        self.environmental_deaths.append(split_player_log[10])
+        self.environmental_kills.append(split_player_log[11])
+        self.healing_dealt.append(split_player_log[12])
+        self.objective_kills.append(split_player_log[13])
+        self.solo_kills.append(split_player_log[14])
+        self.ultimates_earned.append(split_player_log[15])
+        self.ultimates_used.append(split_player_log[16])
+        self.healing_received.append(split_player_log[17])
+        self.ult_charge_percent.append(split_player_log[18])
+        self.player_closest_to_reticle.append(split_player_log[19])
+        self.x_pos.append(split_player_log[20][1:])
+        self.y_pos.append(split_player_log[21])
+        self.z_pos.append(split_player_log[22][:-1])
+        self.team.append(split_player_log[23])
+        self.ability_1_cd.append(split_player_log[24])
+        self.ability_2_cd.append(split_player_log[25])
+        self.health.append(split_player_log[26])
+        self.max_health.append(split_player_log[27])
+        self.health_type_health.append(split_player_log[28])
+        self.health_type_armour.append(split_player_log[29])
+        self.health_type_shields.append(split_player_log[30])
 
 
 def CreatePlayerNameAndIconGUI(icon_size_x, icon_size_y, starting_x, starting_y, left_align, vertical_slot, playerName, heroes, displayPlaytimeBar):
@@ -284,8 +284,11 @@ def CreatePlayerNameAndIconGUI(icon_size_x, icon_size_y, starting_x, starting_y,
 
         if displayPlaytimeBar:
             proportion_of_hero_played = ProportionOfHeroPlayed(heroes, hero)
+            round_proportion = round(proportion_of_hero_played * icon_size_x)
+            if round_proportion < 1:
+                round_proportion = 1
             playtimeBar = customtkinter.CTkLabel(master=frame, text="",
-                                                 image=FetchHeroColour(hero, round(proportion_of_hero_played * icon_size_x), 10), height=10, width=round(proportion_of_hero_played * icon_size_x))
+                                                 image=FetchHeroColour(hero, round_proportion, 10), height=10, width=round_proportion)
             playtimeBar.place(x=icon_x_pos, y=icon_y_pos + icon_size_y)
         index += 1
 
@@ -296,31 +299,62 @@ def ProportionOfHeroPlayed(heroes, hero):
     return heroes[hero]/total_playtime
 
 
-def ParseHeroPlaytimeDataForMatch(playerName, match):
+def ParseHeroPlaytimeData(playerObject):
     timeplayed_hero_dict = {}
 
-    for player in match.players:
-        if player.playername == playerName:
-            for log in range(player.logs_count - 1):
-                if player.hero[log] in timeplayed_hero_dict:
-                    timeplayed_hero_dict[player.hero[log]] += 1
-                else:
-                    timeplayed_hero_dict[player.hero[log]] = 1
+    for log in range(playerObject.logs_count - 1):
+        if playerObject.hero[log] in timeplayed_hero_dict:
+            timeplayed_hero_dict[playerObject.hero[log]] += 1
+        else:
+            timeplayed_hero_dict[playerObject.hero[log]] = 1
 
     return timeplayed_hero_dict
 
 
-def ParseHeroPlaytimeDataForMatchCollection(playerName, matchCollection):
-    timeplayed_hero_dict = {}
-
+def CreateNewPlayerDataObjectFromMatchCollection(playerName, matchCollection):
+    # In order to preserve the correlation between time and player data (i.e. how long a hero is played for or how much damage is dealt per 10m, the new player object needs to store the stacked lists of the matches that make up the match collection
+    collection_player_objects = []
     for match in matchCollection:
-        for key, value in ParseHeroPlaytimeDataForMatch(playerName, match).items():
-            if key in timeplayed_hero_dict.keys():
-                timeplayed_hero_dict[key] += value
-            else:
-                timeplayed_hero_dict[key] = value
+        for player in match.players:
+            if player.playername == playerName:
+                collection_player_objects.append(player)
 
-    return timeplayed_hero_dict
+    return_player = Player(playerName)
+
+    for index, player in enumerate(collection_player_objects):
+        return_player.hero += player.hero
+        return_player.h_dmg_dealt += player.h_dmg_dealt
+        return_player.b_dmg_dealt += player.b_dmg_dealt
+        return_player.dmg_mitigated += player.dmg_mitigated
+        return_player.dmg_taken += player.dmg_taken
+        return_player.deaths += player.deaths
+        return_player.eliminations += player.eliminations
+        return_player.final_blows += player.final_blows
+        return_player.environmental_deaths += player.environmental_deaths
+        return_player.environmental_kills += player.environmental_kills
+        return_player.healing_dealt += player.healing_dealt
+        return_player.objective_kills += player.objective_kills
+        return_player.solo_kills += player.solo_kills
+        return_player.ultimates_earned += player.ultimates_earned
+        return_player.ultimates_used += player.ultimates_used
+        return_player.healing_received += player.healing_received
+        return_player.ult_charge_percent += player.ult_charge_percent
+        return_player.player_closest_to_reticle += player.player_closest_to_reticle
+        return_player.x_pos += player.x_pos
+        return_player.y_pos += player.y_pos
+        return_player.z_pos += player.z_pos
+        return_player.team += player.team
+        return_player.ability_1_cd += player.ability_1_cd
+        return_player.ability_2_cd += player.ability_2_cd
+        return_player.health += player.health
+        return_player.max_health += player.max_health
+        return_player.health_type_health += player.health_type_health
+        return_player.health_type_armour += player.health_type_armour
+        return_player.health_type_shields += player.health_type_shields
+        return_player.logs_count += player.logs_count
+        return_player.playername = playerName
+
+    return return_player
 
 
 def FindTop3(parsedHeroPlaytimeData):
@@ -335,10 +369,16 @@ match3 = Match("Log-2023-04-03-15-25-56.txt")
 
 some_data_collection = [match1, match2]
 
-t1p1_heroes = ParseHeroPlaytimeDataForMatch("morning", match3)
-t2p1_heroes = ParseHeroPlaytimeDataForMatchCollection("Coronet", some_data_collection)
-print(t2p1_heroes)
+morning_combined_player_object = CreateNewPlayerDataObjectFromMatchCollection("morning", some_data_collection)
+coronet_combined_player_object = CreateNewPlayerDataObjectFromMatchCollection("Coronet", some_data_collection)
 
+# morning
+t1p1_heroes = ParseHeroPlaytimeData(morning_combined_player_object)
+# Coronet
+t2p1_heroes = ParseHeroPlaytimeData(match3.team2player1)
+# Above it automatically parses the data for THAT MATCH (match 3), since each match has its own of this player object and match3.player is a unique playerObject which is passed in
+
+t2p1_heroes = ParseHeroPlaytimeData(coronet_combined_player_object)
 CreatePlayerNameAndIconGUI(60, 60, 0, 0, True, 0, match3.team1player1.playername, t1p1_heroes, True)
 CreatePlayerNameAndIconGUI(60, 60, 0, 0, False, 0, match1.team2player1.playername, t2p1_heroes, True)
 
