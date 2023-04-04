@@ -116,6 +116,8 @@ class Match:
                 self.match_stats["Array Of Dead Players Team 2"].append(split[6])
                 self.match_stats["Team Score Team 1"].append(split[7])
                 self.match_stats["Team Score Team 2"].append(split[8])
+                self.match_stats["Team 1 Name"] = split[10]
+                self.match_stats["Team 2 Name"] = split[11]
             elif not line.__contains__("PLAYER LOG") and index > 1:
                 # Logic for game mode log
                 self.match_stats["Gamemode"] = split[0].split(" ")[1]
@@ -232,7 +234,7 @@ class Player:
         self.player_stats["Active Shields"].append(split_player_log[30])
 
 
-def CreatePlayerIconGUI(icon_size_x, icon_size_y, starting_x, starting_y, left_align, vertical_slot, playerName, heroes, displayPlaytimeBar, icon_type):
+def CreatePlayerIconGUI(icon_size_x, icon_size_y, starting_x, starting_y, left_align, vertical_slot, playerName, heroes, displayPlaytimeBar, icon_type, displayed_stats):
     top3 = FindTop3(heroes)
 
     if len(top3) < 3:
@@ -264,26 +266,34 @@ def CreatePlayerIconGUI(icon_size_x, icon_size_y, starting_x, starting_y, left_a
             playtimeBar.place(x=icon_x_pos, y=icon_y_pos + icon_size_y)
         index += 1
 
-    player_name_label = customtkinter.CTkLabel(master=frame, text=playerName.upper(), font=customtkinter.CTkFont(family="BankSansEFCY-Bol", size=14), text_color='#424366')
-    if left_align:
-        label_x = 0 + starting_x + ((index+0.2) * icon_size_x)
-        label_y = 0 + starting_y + (vertical_slot * icon_size_y * playtimeBarPadding) + icon_size_y/3
-        player_name_label.place(x=label_x, y=label_y)
-    else:
-        label_x = 1660 - icon_size_x - ((index+0.6) * icon_size_x) + starting_x
-        label_y = 0 + starting_y + (vertical_slot * icon_size_y * playtimeBarPadding) + icon_size_y/3
-        player_name_label.place(x=label_x, y=label_y)
-
-
-def CreateMatchGUI(icon_size_x, icon_size_y, starting_x, starting_y, match, displayPlaytimeBar, icon_type):
-    for index, player in enumerate(match.players):
-        if index < 5:
-            left_align = True
-            vertical_slot = index
+    for _index, stat in enumerate(displayed_stats):
+        player_name_label = customtkinter.CTkLabel(master=frame, text=stat.upper(), font=customtkinter.CTkFont(family="BankSansEFCY-Bol", size=14), text_color='#424366')
+        if left_align:
+            label_x = 0 + starting_x + ((index+0.2) * icon_size_x) + ((_index+5) * icon_size_x)
+            label_y = 0 + starting_y + (vertical_slot * icon_size_y * playtimeBarPadding) + icon_size_y/3
+            player_name_label.place(x=label_x, y=label_y)
         else:
-            left_align = False
-            vertical_slot = index-5
-        CreatePlayerIconGUI(icon_size_x, icon_size_y, starting_x, starting_y, left_align, vertical_slot, player.player_stats["Player Name"], ParseHeroPlaytimeData(player), displayPlaytimeBar, icon_type)
+            label_x = 1660 - icon_size_x - ((index+0.6) * icon_size_x) + starting_x - ((_index+5) * icon_size_x)
+            label_y = 0 + starting_y + (vertical_slot * icon_size_y * playtimeBarPadding) + icon_size_y/3
+            player_name_label.place(x=label_x, y=label_y)
+
+
+def CreateMatchGUI(icon_size_x, icon_size_y, starting_x, starting_y, match, displayPlaytimeBar, icon_type, displayed_stats):
+    for index, player in enumerate(match.players):
+        if player.player_stats["Player Name"] != "":
+            return_stats = []
+            if index < 5:
+                left_align = True
+                vertical_slot = index
+            else:
+                left_align = False
+                vertical_slot = index-5
+            for item in displayed_stats:
+                if type(player.player_stats[item]) is not str:
+                    return_stats.append(player.player_stats[item][player.player_stats["Logs Count"]-1])
+                else:
+                    return_stats.append(player.player_stats[item])
+            CreatePlayerIconGUI(icon_size_x, icon_size_y, starting_x, starting_y, left_align, vertical_slot, player.player_stats["Player Name"], ParseHeroPlaytimeData(player), displayPlaytimeBar, icon_type, return_stats)
 
 
 def ProportionOfHeroPlayed(heroes, hero):
@@ -387,7 +397,9 @@ selectable_logs.set(log_options[0])
 log_drop_down = customtkinter.CTkOptionMenu(master=topframe, variable=selectable_logs, values=log_options, font=customtkinter.CTkFont(family="BankSansEFCY-LigCon", size=15), width=160)
 log_drop_down.place(x=0,y=58)
 
-CreateMatchGUI(60, 60, 0, 0, Match(selectable_logs.get()), True, "Silhouette")
+displayed_stats = ["Player Name", "Hero Damage Dealt", "Healing Dealt"]
+
+CreateMatchGUI(60, 60, 0, 0, match1, True, "Silhouette", displayed_stats)
 
 root.mainloop()
 
