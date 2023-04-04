@@ -72,7 +72,6 @@ class Match:
     def __init__(self, file):
 
         self.match_stats = {"Map": "", "Players": list(), "Match Round": list(),
-                            "Number Of Living Players Team 1": list(), "Number Of Living Players Team 2": list(),
                             "Array Of Living Players Team 1": list(), "Array Of Living Players Team 2": list(),
                             "Array Of Dead Players Team 1": list(), "Array Of Dead Players Team 2": list(),
                             "Team Score Team 1": list(), "Team Score Team 2": list(), "Gamemode": "",
@@ -108,8 +107,6 @@ class Match:
             if line.__contains__("INFORMATION LOG"):
                 # Logic for information log
                 self.match_stats["Match Round"].append(split[0].split(" ")[1])
-                self.match_stats["Number Of Living Players Team 1"].append(split[1])
-                self.match_stats["Number Of Living Players Team 2"].append(split[2])
                 self.match_stats["Array Of Living Players Team 1"].append(split[3])
                 self.match_stats["Array Of Living Players Team 2"].append(split[4])
                 self.match_stats["Array Of Dead Players Team 1"].append(split[5])
