@@ -5,6 +5,7 @@ import math
 customtkinter.set_appearance_mode("light")
 customtkinter.set_default_color_theme("blue")
 
+
 def MatchPage():
     print("match page")
 
@@ -19,7 +20,7 @@ root.attributes('-fullscreen', True)
 topframe = customtkinter.CTkFrame(master=root, bg_color="#4D6394", fg_color="#4D6394", height=90)
 topframe.pack(side="top", fill="both", expand=True)
 
-frame = customtkinter.CTkFrame(master=root)
+frame = customtkinter.CTkFrame(master=root, bg_color="#ffffff", fg_color="#ffffff")
 frame.pack(side="right", pady=50, padx=60, fill="both", expand=True)
 
 label = customtkinter.CTkLabel(master=topframe, text="OVERSTAT V2.1",
@@ -42,8 +43,9 @@ data_button = customtkinter.CTkButton(master=left_sidebar_frame, text_color='#ff
                                       command=DataPage, width=140)
 data_button.place(y=80)
 
+
 def FetchHeroIcon(heroName, crop_x_left, crop_x_right, crop_y_top, crop_y_bottom, sizex=50, sizey=50):
-    portrait3d = Image.open("3d icons/Icon-" + heroName + ".png")
+    portrait3d = Image.open("3D_Hero_Icons/Icon-" + heroName + ".png")
     portrait3d = portrait3d.resize((sizex, sizey), Image.LANCZOS)
     filter = ImageEnhance.Contrast(portrait3d)
     portrait3d = filter.enhance(0.9)
@@ -51,6 +53,14 @@ def FetchHeroIcon(heroName, crop_x_left, crop_x_right, crop_y_top, crop_y_bottom
         [(sizex * crop_x_left), (sizey * crop_y_top), sizex - (sizex * crop_x_right), sizey - (sizey * crop_y_bottom)])
     portrait3d_photoimage = ImageTk.PhotoImage(cropped)
     return (portrait3d_photoimage)
+
+
+# Somewhat copy-paste of FetchHeroIcon but its only two functions for now and very little code so whatever. I'll make modular later if need be, otherwise this feels like the best solution
+def FetchHeroColour(heroName, sizex=50, sizey=15):
+    colourimage = Image.open("Hero_Colours/" + heroName + ".PNG")
+    colourimage = colourimage.resize((sizex, sizey), Image.LANCZOS)
+    colourimage_photoimage = ImageTk.PhotoImage(colourimage)
+    return colourimage_photoimage
 
 
 class Match:
@@ -252,42 +262,38 @@ class Player:
             self.health_type_shields.append(split_player_log[30])
 
 
-def CreatePlayerNameAndIconGUI(icon_size_x, icon_size_y, starting_x, starting_y, left_align, vertical_slot, playerName, heroName, weighting, hero2Name, weighting2, hero3Name, weighting3):
-    # i.e. if all three 'most played hero' slots are populated
-    icon = customtkinter.CTkLabel(master=frame,
-                                  image=FetchHeroIcon(heroName, 0, 0, 0, 0, sizex=icon_size_x, sizey=icon_size_y),
-                                  text="")
-    if left_align:
-        icon.place(x=0 + starting_x, y=0 + starting_y + (vertical_slot * icon_size_y))
-    else:
-        icon.place(x=1660 - icon_size_x + starting_x, y=0 + starting_y + (vertical_slot * icon_size_y))
+def CreatePlayerNameAndIconGUI(icon_size_x, icon_size_y, starting_x, starting_y, left_align, vertical_slot, playerName, heroes, displayPlaytimeBar):
+    top3 = FindTop3(heroes)
+    index = 0
+    playtimeBarPadding = 1
+    if displayPlaytimeBar:
+        playtimeBarPadding = 1.2
 
-    icon2 = customtkinter.CTkLabel(master=frame,
-                                   image=FetchHeroIcon(hero2Name, 0, 0, 0, 0, sizex=icon_size_x, sizey=icon_size_y),
-                                   text="")
-    if left_align:
-        icon2.place(x=0 + starting_x + icon_size_x, y=0 + starting_y + (vertical_slot * icon_size_y))
-    else:
-        icon2.place(x=1660 - (icon_size_x * 2) + starting_x, y=0 + starting_y + (vertical_slot * icon_size_y))
+    for hero in top3:
+        icon = customtkinter.CTkLabel(master=frame,
+                                      image=FetchHeroIcon(hero, 0, 0, 0, 0, sizex=icon_size_x, sizey=icon_size_y),
+                                      text="")
+        if left_align:
+            icon_x_pos = 0 + starting_x + (index * icon_size_x)
+            icon_y_pos = 0 + starting_y + (vertical_slot * icon_size_y * playtimeBarPadding)
+            icon.place(x=icon_x_pos, y=icon_y_pos)
+        else:
+            icon_x_pos = 1660 - icon_size_x - (index * icon_size_x) + starting_x
+            icon_y_pos = 0 + starting_y + (vertical_slot * icon_size_y * playtimeBarPadding)
+            icon.place(x=icon_x_pos, y=icon_y_pos)
 
-    icon3 = customtkinter.CTkLabel(master=frame,
-                                   image=FetchHeroIcon(hero3Name, 0, 0, 0, 0, sizex=icon_size_x, sizey=icon_size_y),
-                                   text="")
-    if left_align:
-        icon3.place(x=0 + starting_x + (2 * icon_size_x), y=0 + starting_y + (vertical_slot * icon_size_y))
-    else:
-        icon3.place(x=1660 - (icon_size_x * 3) + starting_x, y=0 + starting_y + (vertical_slot * icon_size_y))
+        if displayPlaytimeBar:
+            proportion_of_hero_played = ProportionOfHeroPlayed(heroes, hero)
+            playtimeBar = customtkinter.CTkLabel(master=frame, text="",
+                                                 image=FetchHeroColour(hero, round(proportion_of_hero_played * icon_size_x), 10), height=10, width=round(proportion_of_hero_played * icon_size_x))
+            playtimeBar.place(x=icon_x_pos, y=icon_y_pos + icon_size_y)
+        index += 1
 
-    fontsize = round(0.9 + icon_size_y / 2.75)
-    name = customtkinter.CTkLabel(master=frame, text=playerName.upper(),
-                                  font=customtkinter.CTkFont(family="BankSansEFCY-Reg", size=fontsize),
-                                  text_color='#383235')
-    if left_align:
-        name.place(x=9 + (3.5 * icon_size_x) + starting_x,
-                   y=(0.2 * icon_size_y) + starting_y + (vertical_slot * icon_size_y))
-    else:
-        name.place(x=1559 - (3.5 * icon_size_x) + starting_x,
-                   y=(0.25 * icon_size_y) + starting_y + (vertical_slot * icon_size_y))
+
+def ProportionOfHeroPlayed(heroes, hero):
+
+    total_playtime = sum(heroes.values())
+    return heroes[hero]/total_playtime
 
 
 def ParseHeroPlaytimeDataForMatch(playerName, match):
@@ -318,28 +324,9 @@ def ParseHeroPlaytimeDataForMatchCollection(playerName, matchCollection):
 
 
 def FindTop3(parsedHeroPlaytimeData):
-    highest_h_count = 0
-    second_highest_h_count = 0
-    third_highest_h_count = 0
-    most_played = ""
-    second_most_played = ""
-    third_most_played = ""
-    proportion_of_first = 0
-    proportion_of_second = 0
-    proportion_of_third = 0
-
-    total_playtime = sum(parsedHeroPlaytimeData.values())
 
     top3list = sorted(parsedHeroPlaytimeData, key=parsedHeroPlaytimeData.get, reverse=True)[:3]
-    # print(top3list)
-
-    returnlist = ["" for i in range(6)]
-    for index, hero in enumerate(top3list):
-        returnlist[index*2] = hero
-        returnlist[index*2+1] = parsedHeroPlaytimeData[hero]/total_playtime
-
-    return returnlist
-
+    return top3list
 
 
 match1 = Match("Log-2023-04-02-17-27-33.txt")
@@ -348,36 +335,16 @@ match3 = Match("Log-2023-04-03-15-25-56.txt")
 
 some_data_collection = [match1, match2]
 
+t1p1_heroes = ParseHeroPlaytimeDataForMatch("morning", match3)
+t2p1_heroes = ParseHeroPlaytimeDataForMatchCollection("Coronet", some_data_collection)
+print(t2p1_heroes)
 
+CreatePlayerNameAndIconGUI(60, 60, 0, 0, True, 0, match3.team1player1.playername, t1p1_heroes, True)
+CreatePlayerNameAndIconGUI(60, 60, 0, 0, False, 0, match1.team2player1.playername, t2p1_heroes, True)
 
-t1p1_hero = FindTop3(ParseHeroPlaytimeDataForMatch("morning", match3))
-t2p1_hero = FindTop3(ParseHeroPlaytimeDataForMatchCollection("Coronet", some_data_collection))
-
-CreatePlayerNameAndIconGUI(60, 60, 0, 0, True, 0, match3.team1player1.playername, t1p1_hero[0], t1p1_hero[1], t1p1_hero[2], t1p1_hero[3], t1p1_hero[4], t1p1_hero[5])
-CreatePlayerNameAndIconGUI(60, 60, 0, 0, False, 0, match1.team2player1.playername, t2p1_hero[0], t2p1_hero[1], t2p1_hero[2], t2p1_hero[3], t2p1_hero[4], t2p1_hero[5])
-
-# CreatePlayerNameAndIconGUI(60, 60, 0, 0, True, 1, "Bob", "Reinhardt", 1)
+# t1p2_heroes = {"Reinhardt":90}
+# CreatePlayerNameAndIconGUI(60, 60, 0, 0, True, 1, "Bob", t1p2_heroes, True)
 
 # CreatePlayerNameAndIconGUI(60, 60, 0, 0, False, 1, "Stewart", "Zarya", 1)
 
 root.mainloop()
-
-# FIND A WAY TO GET THE SPECIFIC MAP I.E. ICEBREAKER OR LABS OR SUB LEVEL BY NAME (NO EASILY FOUND WAY TO DO THIS BUT
-# U CAN DO IT I KNOW YOU CAN, EVEN IF IT MEANS SELECTING THE MAPS IN A PSEUDO-RANDOM ORDER RATHER THAN LETTING THE
-# GAME HANDLE IT)
-
-# Add events for sources of elms / damages / deaths like who the attacker is, what ability/ult/primary/secondary did
-# it, etc
-
-# ur rounding method for the icons could be reviewed and made much smarter, rn it kinda sucks
-
-# MAKE IT WORK WITH LEAVERS
-
-# ok push is implemented, so it won't crash but now unfortunately to know is pushing I think you'll need arrays of both
-# teams of who is on payload / bot and u need ur in/out graph / spline thing as well for distance, also forward
-# spawn appears not to affect obj index so that has to be manual as well
-
-# also find a way to log zar and sym energy
-
-# ^ to do this ill have to recreate the system by decaying their number per patch notes and adding it based on h + b
-# damage
