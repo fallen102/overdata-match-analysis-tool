@@ -12,6 +12,7 @@ def MatchPage():
 def DataPage():
     print("data page wooh!")
 
+
 root = customtkinter.CTk()
 root.attributes('-fullscreen', True)
 
@@ -110,57 +111,59 @@ class Match:
 
         # Determing gamemode info from gamemode logs (one of the two non-player logs)
         for index, line in enumerate(self.read):
+            split = line.split(",")
             if line.__contains__("INFORMATION LOG"):
                 # Logic for information log
-                self.match_round.append(line.split(",")[0].split(" ")[1])
-                self.num_living_players_t1.append(line.split(",")[1])
-                self.num_living_players_t2.append(line.split(",")[2])
-                self.array_living_players_t1.append(line.split(",")[3])
-                self.array_living_players_t2.append(line.split(",")[4])
-                self.array_dead_players_t1.append(line.split(",")[5])
-                self.array_dead_players_t2.append(line.split(",")[6])
-                self.team_score_t1.append(line.split(",")[7])
-                self.team_score_t2.append(line.split(",")[8])
+                self.match_round.append(split[0].split(" ")[1])
+                self.num_living_players_t1.append(split[1])
+                self.num_living_players_t2.append(split[2])
+                self.array_living_players_t1.append(split[3])
+                self.array_living_players_t2.append(split[4])
+                self.array_dead_players_t1.append(split[5])
+                self.array_dead_players_t2.append(split[6])
+                self.team_score_t1.append(split[7])
+                self.team_score_t2.append(split[8])
             elif not line.__contains__("PLAYER LOG") and index > 1:
                 # Logic for game mode log
-                self.game_mode = line.split(",")[0].split(" ")[1]
-                self.time_elapsed.append(line.split(",")[1])
+                self.game_mode = split[0].split(" ")[1]
+                self.time_elapsed.append(split[1])
                 if self.game_mode == "Control":
-                    self.control_mode_score_percent_t1.append(line.split(",")[2])
-                    self.control_mode_score_percent_t2.append(line.split(",")[3])
-                    self.is_control_point_locked.append(line.split(",")[4])
-                    self.control_mode_scoring_team.append(line.split(",")[5])
-                    self.num_players_on_control_point.append(line.split(",")[6])
+                    self.control_mode_score_percent_t1.append(split[2])
+                    self.control_mode_score_percent_t2.append(split[3])
+                    self.is_control_point_locked.append(split[4])
+                    self.control_mode_scoring_team.append(split[5])
+                    self.num_players_on_control_point.append(split[6])
                 elif self.game_mode == "Escort":
-                    self.is_team_1_attacking.append(line.split(",")[2])
-                    self.payload_progress_percent.append(line.split(",")[3])
-                    self.objective_index.append(line.split(",")[4])
+                    self.is_team_1_attacking.append(split[2])
+                    self.payload_progress_percent.append(split[3])
+                    self.objective_index.append(split[4])
                 elif self.game_mode == "Assault":
-                    self.is_team_1_attacking.append(line.split(",")[2])
-                    self.point_capture_percent.append(line.split(",")[3])
-                    self.objective_index.append(line.split(",")[4])
+                    self.is_team_1_attacking.append(split[2])
+                    self.point_capture_percent.append(split[3])
+                    self.objective_index.append(split[4])
                 elif self.game_mode == "Hybrid":
-                    self.is_team_1_attacking.append(line.split(",")[2])
-                    self.point_capture_percent.append(line.split(",")[3])
-                    self.payload_progress_percent.append(line.split(",")[4])
-                    self.objective_index.append(line.split(",")[5])
+                    self.is_team_1_attacking.append(split[2])
+                    self.point_capture_percent.append(split[3])
+                    self.payload_progress_percent.append(split[4])
+                    self.objective_index.append(split[5])
                 elif self.game_mode == "Push":
-                    self.push_payload_pos_x.append(line.split(",")[2][1:-1])
-                    self.push_payload_pos_y.append(line.split(",")[3][1:])
-                    self.push_payload_pos_z.append(line.split(",")[4][1:-3])
+                    self.push_payload_pos_x.append(split[2][1:-1])
+                    self.push_payload_pos_y.append(split[3][1:])
+                    self.push_payload_pos_z.append(split[4][1:-3])
 
         # Creating each player object for the match based on username from the second log line
-        self.team1player1 = Player(self.read[1].split(",")[0].split(" ")[1], self.players)
-        self.team1player2 = Player(self.read[1].split(",")[1], self.players)
-        self.team1player3 = Player(self.read[1].split(",")[2], self.players)
-        self.team1player4 = Player(self.read[1].split(",")[3], self.players)
-        self.team1player5 = Player(self.read[1].split(",")[4], self.players)
+        players_line_split = self.read[1].split(",")
+        self.team1player1 = Player(players_line_split[0].split(" ")[1], self.players)
+        self.team1player2 = Player(players_line_split[1], self.players)
+        self.team1player3 = Player(players_line_split[2], self.players)
+        self.team1player4 = Player(players_line_split[3], self.players)
+        self.team1player5 = Player(players_line_split[4], self.players)
 
-        self.team2player1 = Player(self.read[1].split(",")[6], self.players)
-        self.team2player2 = Player(self.read[1].split(",")[7], self.players)
-        self.team2player3 = Player(self.read[1].split(",")[8], self.players)
-        self.team2player4 = Player(self.read[1].split(",")[9], self.players)
-        self.team2player5 = Player(self.read[1].split(",")[10], self.players)
+        self.team2player1 = Player(players_line_split[6], self.players)
+        self.team2player2 = Player(players_line_split[7], self.players)
+        self.team2player3 = Player(players_line_split[8], self.players)
+        self.team2player4 = Player(players_line_split[9], self.players)
+        self.team2player5 = Player(players_line_split[10], self.players)
 
         # Determining which lines need to be logged and the relevant player object to log them under
         for index, line in enumerate(self.read):
@@ -249,581 +252,94 @@ class Player:
             self.health_type_shields.append(split_player_log[30])
 
 
-def CreatePlayerNameAndIconGUI(icon_size_x, icon_size_y, starting_x, starting_y, left_align, vertical_slot, playerName,heroName, weighting=None,hero2Name=None, weighting2=None, hero3Name=None, weighting3=None):
-    # If there is only one hero played
-    if hero2Name is None:
-
-        icon = customtkinter.CTkLabel(master=frame,
-                                      image=FetchHeroIcon(heroName, 0, 0, 0, 0, sizex=icon_size_x, sizey=icon_size_y),
-                                      text="")
-        if left_align:
-            icon.place(x=0 + starting_x, y=0 + starting_y + (vertical_slot * icon_size_y))
-        else:
-            icon.place(x=1660 - icon_size_x + starting_x, y=0 + starting_y + (vertical_slot * icon_size_y))
-
-        fontsize = round(0.9 + icon_size_y / 2.75)
-        name = customtkinter.CTkLabel(master=frame, text=playerName.upper(),
-                                      font=customtkinter.CTkFont(family="BankSansEFCY-Reg", size=fontsize),
-                                      text_color='#383235')
-        if left_align:
-            name.place(x=9 + (3.5 * icon_size_x) + starting_x,
-                       y=(0.2 * icon_size_y) + starting_y + (vertical_slot * icon_size_y))
-        else:
-            name.place(x=1559 - (3.5 * icon_size_x) + starting_x,
-                       y=(0.25 * icon_size_y) + starting_y + (vertical_slot * icon_size_y))
-
-        icon2 = customtkinter.CTkLabel(master=frame,
-                                      image=FetchHeroIcon("EMPTY", 0, 0, 0, 0, sizex=icon_size_x, sizey=icon_size_y),
-                                      text="")
-        if left_align:
-            icon2.place(x=0 + starting_x + icon_size_x, y=0 + starting_y + (vertical_slot * icon_size_y))
-        else:
-            icon2.place(x=1660 - (icon_size_x*2) + starting_x, y=0 + starting_y + (vertical_slot * icon_size_y))
-
-        icon3 = customtkinter.CTkLabel(master=frame,
-                                       image=FetchHeroIcon("EMPTY", 0, 0, 0, 0, sizex=icon_size_x, sizey=icon_size_y),
-                                       text="")
-        if left_align:
-            icon3.place(x=0 + starting_x + (2* icon_size_x), y=0 + starting_y + (vertical_slot * icon_size_y))
-        else:
-            icon3.place(x=1660 - (icon_size_x * 3) + starting_x, y=0 + starting_y + (vertical_slot * icon_size_y))
-
-    # i.e. if there are exactly two heroes played
-    elif hero2Name is not None and hero3Name is None:
-        icon = customtkinter.CTkLabel(master=frame,
-                                      image=FetchHeroIcon(heroName, 0, 0, 0, 0, sizex=icon_size_x, sizey=icon_size_y),
-                                      text="")
-        if left_align:
-            icon.place(x=0 + starting_x, y=0 + starting_y + (vertical_slot * icon_size_y))
-        else:
-            icon.place(x=1660 - icon_size_x + starting_x, y=0 + starting_y + (vertical_slot * icon_size_y))
-
-        icon2 = customtkinter.CTkLabel(master=frame,
-                                       image=FetchHeroIcon(hero2Name, 0, 0, 0, 0, sizex=icon_size_x, sizey=icon_size_y),
-                                       text="")
-        if left_align:
-            icon2.place(x=0 + starting_x + icon_size_x, y=0 + starting_y + (vertical_slot * icon_size_y))
-        else:
-            icon2.place(x=1660 - (icon_size_x * 2) + starting_x, y=0 + starting_y + (vertical_slot * icon_size_y))
-
-        icon3 = customtkinter.CTkLabel(master=frame,
-                                       image=FetchHeroIcon("EMPTY", 0, 0, 0, 0, sizex=icon_size_x, sizey=icon_size_y),
-                                       text="")
-        if left_align:
-            icon3.place(x=0 + starting_x + (2 * icon_size_x), y=0 + starting_y + (vertical_slot * icon_size_y))
-        else:
-            icon3.place(x=1660 - (icon_size_x * 3) + starting_x, y=0 + starting_y + (vertical_slot * icon_size_y))
-
-        fontsize = round(0.9 + icon_size_y / 2.75)
-        name = customtkinter.CTkLabel(master=frame, text=playerName.upper(),
-                                      font=customtkinter.CTkFont(family="BankSansEFCY-Reg", size=fontsize),
-                                      text_color='#383235')
-        if left_align:
-            name.place(x=9 + (3.5 * icon_size_x) + starting_x,
-                       y=(0.2 * icon_size_y) + starting_y + (vertical_slot * icon_size_y))
-        else:
-            name.place(x=1559 - (3.5 * icon_size_x) + starting_x,
-                       y=(0.25 * icon_size_y) + starting_y + (vertical_slot * icon_size_y))
+def CreatePlayerNameAndIconGUI(icon_size_x, icon_size_y, starting_x, starting_y, left_align, vertical_slot, playerName, heroName, weighting, hero2Name, weighting2, hero3Name, weighting3):
     # i.e. if all three 'most played hero' slots are populated
-    elif hero3Name is not None:
-        icon = customtkinter.CTkLabel(master=frame,
-                                      image=FetchHeroIcon(heroName, 0, 0, 0, 0, sizex=icon_size_x, sizey=icon_size_y),
-                                      text="")
-        if left_align:
-            icon.place(x=0 + starting_x, y=0 + starting_y + (vertical_slot * icon_size_y))
-        else:
-            icon.place(x=1660 - icon_size_x + starting_x, y=0 + starting_y + (vertical_slot * icon_size_y))
+    icon = customtkinter.CTkLabel(master=frame,
+                                  image=FetchHeroIcon(heroName, 0, 0, 0, 0, sizex=icon_size_x, sizey=icon_size_y),
+                                  text="")
+    if left_align:
+        icon.place(x=0 + starting_x, y=0 + starting_y + (vertical_slot * icon_size_y))
+    else:
+        icon.place(x=1660 - icon_size_x + starting_x, y=0 + starting_y + (vertical_slot * icon_size_y))
 
-        icon2 = customtkinter.CTkLabel(master=frame,
-                                       image=FetchHeroIcon(hero2Name, 0, 0, 0, 0, sizex=icon_size_x, sizey=icon_size_y),
-                                       text="")
-        if left_align:
-            icon2.place(x=0 + starting_x + icon_size_x, y=0 + starting_y + (vertical_slot * icon_size_y))
-        else:
-            icon2.place(x=1660 - (icon_size_x * 2) + starting_x, y=0 + starting_y + (vertical_slot * icon_size_y))
+    icon2 = customtkinter.CTkLabel(master=frame,
+                                   image=FetchHeroIcon(hero2Name, 0, 0, 0, 0, sizex=icon_size_x, sizey=icon_size_y),
+                                   text="")
+    if left_align:
+        icon2.place(x=0 + starting_x + icon_size_x, y=0 + starting_y + (vertical_slot * icon_size_y))
+    else:
+        icon2.place(x=1660 - (icon_size_x * 2) + starting_x, y=0 + starting_y + (vertical_slot * icon_size_y))
 
-        icon3 = customtkinter.CTkLabel(master=frame,
-                                       image=FetchHeroIcon(hero3Name, 0, 0, 0, 0, sizex=icon_size_x, sizey=icon_size_y),
-                                       text="")
-        if left_align:
-            icon3.place(x=0 + starting_x + (2 * icon_size_x), y=0 + starting_y + (vertical_slot * icon_size_y))
-        else:
-            icon3.place(x=1660 - (icon_size_x * 3) + starting_x, y=0 + starting_y + (vertical_slot * icon_size_y))
+    icon3 = customtkinter.CTkLabel(master=frame,
+                                   image=FetchHeroIcon(hero3Name, 0, 0, 0, 0, sizex=icon_size_x, sizey=icon_size_y),
+                                   text="")
+    if left_align:
+        icon3.place(x=0 + starting_x + (2 * icon_size_x), y=0 + starting_y + (vertical_slot * icon_size_y))
+    else:
+        icon3.place(x=1660 - (icon_size_x * 3) + starting_x, y=0 + starting_y + (vertical_slot * icon_size_y))
 
-        fontsize = round(0.9 + icon_size_y / 2.75)
-        name = customtkinter.CTkLabel(master=frame, text=playerName.upper(),
-                                      font=customtkinter.CTkFont(family="BankSansEFCY-Reg", size=fontsize),
-                                      text_color='#383235')
-        if left_align:
-            name.place(x=9 + (3.5 * icon_size_x) + starting_x,
-                       y=(0.2 * icon_size_y) + starting_y + (vertical_slot * icon_size_y))
-        else:
-            name.place(x=1559 - (3.5 * icon_size_x) + starting_x,
-                       y=(0.25 * icon_size_y) + starting_y + (vertical_slot * icon_size_y))
-
-
-def TryCreatePlayerNameAndIconGUI(icon_size_x, icon_size_y, starting_x, starting_y, left_align, vertical_slot, playerName, item_0, item_1, item_2, item_3, item_4, item_5):
-    try:
-        CreatePlayerNameAndIconGUI(icon_size_x, icon_size_y, starting_x, starting_y, left_align, vertical_slot, playerName, item_0, item_1, item_2, item_3, item_4, item_5)
-    except:
-        try:
-            CreatePlayerNameAndIconGUI(icon_size_x, icon_size_y, starting_x, starting_y, left_align, vertical_slot, playerName, item_0, item_1, item_2, item_3)
-        except:
-            CreatePlayerNameAndIconGUI(icon_size_x, icon_size_y, starting_x, starting_y, left_align, vertical_slot, playerName, item_0, item_1)
+    fontsize = round(0.9 + icon_size_y / 2.75)
+    name = customtkinter.CTkLabel(master=frame, text=playerName.upper(),
+                                  font=customtkinter.CTkFont(family="BankSansEFCY-Reg", size=fontsize),
+                                  text_color='#383235')
+    if left_align:
+        name.place(x=9 + (3.5 * icon_size_x) + starting_x,
+                   y=(0.2 * icon_size_y) + starting_y + (vertical_slot * icon_size_y))
+    else:
+        name.place(x=1559 - (3.5 * icon_size_x) + starting_x,
+                   y=(0.25 * icon_size_y) + starting_y + (vertical_slot * icon_size_y))
 
 
-def Top3HeroesPlayedProportionallyMatch(playerName, match):
-    ana = 0
-    ashe = 0
-    baptiste = 0
-    bastion = 0
-    brigitte = 0
-    cassidy = 0
-    doomfist = 0
-    dva = 0
-    echo = 0
-    genji = 0
-    hanzo = 0
-    junkerqueen = 0
-    junkrat = 0
-    kiriko = 0
-    lucio = 0
-    mei = 0
-    mercy = 0
-    moira = 0
-    orisa = 0
-    pharah = 0
-    ramattra = 0
-    reaper = 0
-    reinhardt = 0
-    roadhog = 0
-    sigma = 0
-    sojourn = 0
-    soldier76 = 0
-    sombra = 0
-    symmetra = 0
-    torbjorn = 0
-    tracer = 0
-    widowmaker = 0
-    winston = 0
-    wreckingball = 0
-    zarya = 0
-    zenyatta = 0
+def ParseHeroPlaytimeDataForMatch(playerName, match):
+    timeplayed_hero_dict = {}
 
     for player in match.players:
         if player.playername == playerName:
             for log in range(player.logs_count - 1):
-                # You need to ensure the log file deals with spacing the same way as the strings in the below match/case statement, i.e. Junkerqueen or Junker Queen or Junker queen
-                match player.hero[log]:
-                    case "Ana":
-                        ana += 1
-                        continue
-                    case "Ashe":
-                        ashe += 1
-                        continue
-                    case "Baptiste":
-                        baptiste += 1
-                        continue
-                    case "Bastion":
-                        bastion += 1
-                        continue
-                    case "Brigitte":
-                        brigitte += 1
-                        continue
-                    case "D.Va":
-                        dva += 1
-                        continue
-                    case "Doomfist":
-                        doomfist += 1
-                        continue
-                    case "Echo":
-                        echo += 1
-                        continue
-                    case "Genji":
-                        genji += 1
-                        continue
-                    case "Hanzo":
-                        hanzo += 1
-                        continue
-                    case "Junkrat":
-                        junkrat += 1
-                        continue
-                    case "Lucio":
-                        lucio += 1
-                        continue
-                    case "Cassidy":
-                        cassidy += 1
-                        continue
-                    case "Mei":
-                        mei += 1
-                        continue
-                    case "Mercy":
-                        mercy += 1
-                        continue
-                    case "Moira":
-                        moira += 1
-                        continue
-                    case "Orisa":
-                        orisa += 1
-                        continue
-                    case "Pharah":
-                        pharah += 1
-                        continue
-                    case "Reaper":
-                        reaper += 1
-                        continue
-                    case "Reinhardt":
-                        reinhardt += 1
-                        continue
-                    case "Roadhog":
-                        roadhog += 1
-                        continue
-                    case "Sigma":
-                        sigma += 1
-                        continue
-                    case "Soldier: 76":
-                        soldier76 += 1
-                        continue
-                    case "Sombra":
-                        sombra += 1
-                        continue
-                    case "Symmetra":
-                        symmetra += 1
-                        continue
-                    case "Torbjorn":
-                        torbjorn += 1
-                        continue
-                    case "Tracer":
-                        tracer += 1
-                        continue
-                    case "Widowmaker":
-                        widowmaker += 1
-                        continue
-                    case "Winston":
-                        winston += 1
-                        continue
-                    case "Wrecking Ball":
-                        wreckingball += 1
-                        continue
-                    case "Zarya":
-                        zarya += 1
-                        continue
-                    case "Zenyatta":
-                        zenyatta += 1
-                        continue
-                    case "Junkerqueen":
-                        junkerqueen += 1
-                        continue
-                    case "Sojourn":
-                        sojourn += 1
-                        continue
-                    case "Kiriko":
-                        kiriko += 1
-                        continue
-                    case "Ramattra":
-                        ramattra += 1
-                        continue
-            heroes = [ana, ashe, baptiste, bastion, brigitte, dva, doomfist, echo, genji, hanzo, junkrat, lucio,
-                      cassidy,
-                      mei, mercy, moira, orisa, pharah, reaper, reinhardt, roadhog, sigma, soldier76, sombra, symmetra,
-                      torbjorn, tracer, widowmaker, winston, wreckingball, zarya, zenyatta, ramattra, sojourn, kiriko,
-                      junkerqueen]
-            heroes_string = ["Ana", "Ashe", "Baptiste", "Bastion", "Brigitte", "D.Va", "Doomfist", "Echo", "Genji",
-                             "Hanzo",
-                             "Junkrat", "Lucio", "McCree", "Mei", "Mercy", "Moira", "Orisa", "Pharah", "Reaper",
-                             "Reinhardt",
-                             "Roadhog", "Sigma", "Soldier76", "Sombra", "Symmetra", "Torbjorn", "Tracer", "Widowmaker",
-                             "Winston", "Wrecking Ball", "Zarya", "Zenyatta", "Ramattra", "Sojourn", "Kiriko",
-                             "Junkerqueen"]
+                if player.hero[log] in timeplayed_hero_dict:
+                    timeplayed_hero_dict[player.hero[log]] += 1
+                else:
+                    timeplayed_hero_dict[player.hero[log]] = 1
 
-            highest_h_count = 0
-            second_highest_h_count = 0
-            third_highest_h_count = 0
-            most_played = ""
-            second_most_played = ""
-            third_most_played = ""
-            for index, hero in enumerate(heroes):
-                # If a new "most played hero" is identified
-                if hero > highest_h_count:
-                    # If #1 does not exist
-                    if most_played == "":
-                        highest_h_count = hero
-                        most_played = heroes_string[index]
-                        proportion_of_first = math.floor(1000 * hero / player.logs_count) / 1000
-                    else:
-                        if second_most_played == "":
-                            # If #1 already exists but #2 does not
-                            second_highest_h_count = highest_h_count
-                            second_most_played = most_played
-                            proportion_of_second = proportion_of_first
-                            highest_h_count = hero
-                            most_played = heroes_string[index]
-                            proportion_of_first = math.floor(1000 * hero / player.logs_count) / 1000
-                        else:
-                            # If #1 and #2 both already exist
-                            third_most_played = second_most_played
-                            third_highest_h_count = second_highest_h_count
-                            proportion_of_third = proportion_of_second
-                            second_most_played = most_played
-                            second_highest_h_count = highest_h_count
-                            proportion_of_second = proportion_of_first
-                            highest_h_count = hero
-                            most_played = heroes_string[index]
-                            proportion_of_first = math.floor(1000 * hero / player.logs_count) / 1000
-                    del heroes[index]
-                    del heroes_string[index]
-            for index, hero in enumerate(heroes):
-                # If a new "second most played hero" is identified
-                if hero > second_highest_h_count:
-                    if second_most_played == "":
-                        # If #2 does not exist yet
-                        second_highest_h_count = hero
-                        second_most_played = heroes_string[index]
-                        proportion_of_second = math.floor(1000 * hero / player.logs_count) / 1000
-                    else:
-                        # If #2 already exists
-                        third_most_played = second_most_played
-                        third_highest_h_count = second_highest_h_count
-                        proportion_of_third = proportion_of_second
-                        second_most_played = heroes_string[index]
-                        second_highest_h_count = hero
-                        proportion_of_second = math.floor(1000 * hero / player.logs_count) / 1000
-                    del heroes[index]
-                    del heroes_string[index]
-            for index, hero in enumerate(heroes):
-                if hero > third_highest_h_count:
-                    third_highest_h_count = hero
-                    third_most_played = heroes_string[index]
-                    proportion_of_third = math.floor(1000 * hero / player.logs_count) / 1000
-
-    try:
-        returnlist = [most_played, proportion_of_first, second_most_played, proportion_of_second, third_most_played,
-                      proportion_of_third]
-        return returnlist
-    except:
-        print("Only one/two heroes played")
-    try:
-        returnlist = [most_played, proportion_of_first, second_most_played, proportion_of_second, "", ""]
-        return returnlist
-    except:
-        print("Only one hero played")
-
-    returnlist = [most_played, proportion_of_first, "", "", "", ""]
-    return returnlist
+    return timeplayed_hero_dict
 
 
-def Top3HeroesPlayedProportionallyMatchCollection(playerName, matchCollection):
-    ana = 0
-    ashe = 0
-    baptiste = 0
-    bastion = 0
-    brigitte = 0
-    cassidy = 0
-    doomfist = 0
-    dva = 0
-    echo = 0
-    genji = 0
-    hanzo = 0
-    junkerqueen = 0
-    junkrat = 0
-    kiriko = 0
-    lucio = 0
-    mei = 0
-    mercy = 0
-    moira = 0
-    orisa = 0
-    pharah = 0
-    ramattra = 0
-    reaper = 0
-    reinhardt = 0
-    roadhog = 0
-    sigma = 0
-    sojourn = 0
-    soldier76 = 0
-    sombra = 0
-    symmetra = 0
-    torbjorn = 0
-    tracer = 0
-    widowmaker = 0
-    winston = 0
-    wreckingball = 0
-    zarya = 0
-    zenyatta = 0
+def ParseHeroPlaytimeDataForMatchCollection(playerName, matchCollection):
+    timeplayed_hero_dict = {}
+
     for match in matchCollection:
-        for player in match.players:
-            if player.playername == playerName:
-                for log in range(player.logs_count - 1):
-                    # You need to ensure the log file deals with spacing the same way as the strings in the below match/case statement, i.e. Junkerqueen or Junker Queen or Junker queen
-                    match player.hero[log]:
-                        case "Ana":
-                            ana += 1
-                            continue
-                        case "Ashe":
-                            ashe += 1
-                            continue
-                        case "Baptiste":
-                            baptiste += 1
-                            continue
-                        case "Bastion":
-                            bastion += 1
-                            continue
-                        case "Brigitte":
-                            brigitte += 1
-                            continue
-                        case "D.Va":
-                            dva += 1
-                            continue
-                        case "Doomfist":
-                            doomfist += 1
-                            continue
-                        case "Echo":
-                            echo += 1
-                            continue
-                        case "Genji":
-                            genji += 1
-                            continue
-                        case "Hanzo":
-                            hanzo += 1
-                            continue
-                        case "Junkrat":
-                            junkrat += 1
-                            continue
-                        case "Lucio":
-                            lucio += 1
-                            continue
-                        case "Cassidy":
-                            cassidy += 1
-                            continue
-                        case "Mei":
-                            mei += 1
-                            continue
-                        case "Mercy":
-                            mercy += 1
-                            continue
-                        case "Moira":
-                            moira += 1
-                            continue
-                        case "Orisa":
-                            orisa += 1
-                            continue
-                        case "Pharah":
-                            pharah += 1
-                            continue
-                        case "Reaper":
-                            reaper += 1
-                            continue
-                        case "Reinhardt":
-                            reinhardt += 1
-                            continue
-                        case "Roadhog":
-                            roadhog += 1
-                            continue
-                        case "Sigma":
-                            sigma += 1
-                            continue
-                        case "Soldier: 76":
-                            soldier76 += 1
-                            continue
-                        case "Sombra":
-                            sombra += 1
-                            continue
-                        case "Symmetra":
-                            symmetra += 1
-                            continue
-                        case "Torbjorn":
-                            torbjorn += 1
-                            continue
-                        case "Tracer":
-                            tracer += 1
-                            continue
-                        case "Widowmaker":
-                            widowmaker += 1
-                            continue
-                        case "Winston":
-                            winston += 1
-                            continue
-                        case "Wrecking Ball":
-                            wreckingball += 1
-                            continue
-                        case "Zarya":
-                            zarya += 1
-                            continue
-                        case "Zenyatta":
-                            zenyatta += 1
-                            continue
-                        case "Junkerqueen":
-                            junkerqueen += 1
-                            continue
-                        case "Sojourn":
-                            sojourn += 1
-                            continue
-                        case "Kiriko":
-                            kiriko += 1
-                            continue
-                        case "Ramattra":
-                            ramattra += 1
-                            continue
-    heroes = [ana, ashe, baptiste, bastion, brigitte, dva, doomfist, echo, genji, hanzo, junkrat, lucio,
-              cassidy,
-              mei, mercy, moira, orisa, pharah, reaper, reinhardt, roadhog, sigma, soldier76, sombra,
-              symmetra,
-              torbjorn, tracer, widowmaker, winston, wreckingball, zarya, zenyatta, ramattra, sojourn,
-              kiriko, junkerqueen]
-    heroes_string = ["Ana", "Ashe", "Baptiste", "Bastion", "Brigitte", "D.Va", "Doomfist", "Echo", "Genji",
-                     "Hanzo",
-                     "Junkrat", "Lucio", "McCree", "Mei", "Mercy", "Moira", "Orisa", "Pharah", "Reaper",
-                     "Reinhardt",
-                     "Roadhog", "Sigma", "Soldier76", "Sombra", "Symmetra", "Torbjorn", "Tracer",
-                     "Widowmaker",
-                     "Winston", "Wrecking Ball", "Zarya", "Zenyatta", "Ramattra", "Sojourn", "Kiriko",
-                     "Junkerqueen"]
+        for key, value in ParseHeroPlaytimeDataForMatch(playerName, match).items():
+            if key in timeplayed_hero_dict.keys():
+                timeplayed_hero_dict[key] += value
+            else:
+                timeplayed_hero_dict[key] = value
 
+    return timeplayed_hero_dict
+
+
+def FindTop3(parsedHeroPlaytimeData):
     highest_h_count = 0
     second_highest_h_count = 0
     third_highest_h_count = 0
+    most_played = ""
+    second_most_played = ""
+    third_most_played = ""
+    proportion_of_first = 0
+    proportion_of_second = 0
+    proportion_of_third = 0
 
-    total_logs = 0
+    total_playtime = sum(parsedHeroPlaytimeData.values())
 
-    for match in matchCollection:
-        for player in match.players:
-            if player.playername == playerName:
-                total_logs += player.logs_count
+    top3list = sorted(parsedHeroPlaytimeData, key=parsedHeroPlaytimeData.get, reverse=True)[:3]
+    # print(top3list)
 
-    for index, hero in enumerate(heroes):
-        if hero > highest_h_count:
-            highest_h_count = hero
-            most_played = heroes_string[index]
-            proportion_of_first = math.ceil(10 * hero / total_logs) / 10
-            del heroes[index]
-            del heroes_string[index]
-    for index, hero in enumerate(heroes):
-        if hero > second_highest_h_count:
-            second_highest_h_count = hero
-            second_most_played = heroes_string[index]
-            proportion_of_second = math.ceil(10 * hero / total_logs) / 10
-            del heroes[index]
-            del heroes_string[index]
-    for index, hero in enumerate(heroes):
-        if hero > third_highest_h_count:
-            third_highest_h_count = hero
-            third_most_played = heroes_string[index]
-            proportion_of_third = math.ceil(10 * hero / total_logs) / 10
+    returnlist = ["" for i in range(6)]
+    for index, hero in enumerate(top3list):
+        returnlist[index*2] = hero
+        returnlist[index*2+1] = parsedHeroPlaytimeData[hero]/total_playtime
 
-    try:
-        returnlist = [most_played, proportion_of_first, second_most_played, proportion_of_second, third_most_played,
-                      proportion_of_third]
-        return returnlist
-    except:
-        print("Only one/two heroes played")
-
-    try:
-        returnlist = [most_played, proportion_of_first, second_most_played, proportion_of_second, "", ""]
-        return returnlist
-    except:
-        print("Only one hero played")
-
-    returnlist = [most_played, proportion_of_first, "", "", "", ""]
     return returnlist
+
 
 
 match1 = Match("Log-2023-04-02-17-27-33.txt")
@@ -832,17 +348,19 @@ match3 = Match("Log-2023-04-03-15-25-56.txt")
 
 some_data_collection = [match1, match2]
 
-t1p1_hero = Top3HeroesPlayedProportionallyMatch("morning", match3)
-t2p1_hero = Top3HeroesPlayedProportionallyMatch("Coronet", match3)
 
-TryCreatePlayerNameAndIconGUI(60, 60, 0, 0, True, 0, match3.team1player1.playername, t1p1_hero[0], t1p1_hero[1], t1p1_hero[2], t1p1_hero[3], t1p1_hero[4], t1p1_hero[5])
-TryCreatePlayerNameAndIconGUI(60, 60, 0, 0, False, 0, match1.team2player1.playername, t2p1_hero[0], t2p1_hero[1], t2p1_hero[2], t2p1_hero[3], t2p1_hero[4], t2p1_hero[5])
 
-# CreatePlayerNameAndIconGUI(40, 40, 0, 0, True, 1, "Bob", "Reinhardt", 1)
+t1p1_hero = FindTop3(ParseHeroPlaytimeDataForMatch("morning", match3))
+t2p1_hero = FindTop3(ParseHeroPlaytimeDataForMatchCollection("Coronet", some_data_collection))
 
-# CreatePlayerNameAndIconGUI(110, 110, 0, 0, True, 1, "Stewart", "Zarya", 1)
+CreatePlayerNameAndIconGUI(60, 60, 0, 0, True, 0, match3.team1player1.playername, t1p1_hero[0], t1p1_hero[1], t1p1_hero[2], t1p1_hero[3], t1p1_hero[4], t1p1_hero[5])
+CreatePlayerNameAndIconGUI(60, 60, 0, 0, False, 0, match1.team2player1.playername, t2p1_hero[0], t2p1_hero[1], t2p1_hero[2], t2p1_hero[3], t2p1_hero[4], t2p1_hero[5])
 
-# root.mainloop()
+# CreatePlayerNameAndIconGUI(60, 60, 0, 0, True, 1, "Bob", "Reinhardt", 1)
+
+# CreatePlayerNameAndIconGUI(60, 60, 0, 0, False, 1, "Stewart", "Zarya", 1)
+
+root.mainloop()
 
 # FIND A WAY TO GET THE SPECIFIC MAP I.E. ICEBREAKER OR LABS OR SUB LEVEL BY NAME (NO EASILY FOUND WAY TO DO THIS BUT
 # U CAN DO IT I KNOW YOU CAN, EVEN IF IT MEANS SELECTING THE MAPS IN A PSEUDO-RANDOM ORDER RATHER THAN LETTING THE
