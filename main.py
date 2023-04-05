@@ -1,22 +1,35 @@
 import os
 import threading
 from time import sleep
-
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import numpy as np
 import customtkinter
 from PIL import ImageTk, Image, ImageEnhance
 import math
-
-customtkinter.set_appearance_mode("light")
-customtkinter.set_default_color_theme("blue")
+import seaborn as sns
 
 
 def MatchPage():
-    print("match page")
+    data_frame.pack_forget()
+    player_comparison_frame.pack_forget()
+    frame.pack(side="right", pady=50, padx=60, fill="both", expand=True)
 
 
 def DataPage():
-    print("data page wooh!")
+    frame.pack_forget()
+    player_comparison_frame.pack_forget()
+    data_frame.pack(side="right", pady=50, padx=60, fill="both", expand=True)
 
+
+def PlayerComparisonPage():
+    frame.pack_forget()
+    data_frame.pack_forget()
+    player_comparison_frame.pack(side="right", pady=50, padx=60, fill="both", expand=True)
+
+
+customtkinter.set_appearance_mode("light")
+customtkinter.set_default_color_theme("blue")
 
 root = customtkinter.CTk()
 root.attributes('-fullscreen', True)
@@ -26,6 +39,10 @@ topframe.pack(side="top", fill="both", expand=True)
 
 frame = customtkinter.CTkFrame(master=root, bg_color="#ffffff", fg_color="#ffffff")
 frame.pack(side="right", pady=50, padx=60, fill="both", expand=True)
+
+player_comparison_frame = customtkinter.CTkFrame(master=root, bg_color="#ffffff", fg_color="#ffffff")
+
+data_frame = customtkinter.CTkFrame(master=root, bg_color="#ffffff", fg_color="#ffffff")
 
 # Temporary exit icon to close app
 exit_icon = Image.open("Button Icons/Exit.png")
@@ -234,7 +251,7 @@ class Player:
         self.player_stats["Active Shields"].append(split_player_log[30])
 
 
-def CreatePlayerIconGUI(icon_size_x, icon_size_y, starting_x, starting_y, left_align, vertical_slot, playerName, heroes, displayPlaytimeBar, icon_type, displayed_stats):
+def CreatePlayerIconGUI(icon_size_x, icon_size_y, starting_x, starting_y, left_align, vertical_slot, playerName, heroes, displayPlaytimeBar, icon_type, displayed_stats, display_team_name):
     top3 = FindTop3(heroes)
 
     if len(top3) < 3:
@@ -266,20 +283,38 @@ def CreatePlayerIconGUI(icon_size_x, icon_size_y, starting_x, starting_y, left_a
             playtimeBar.place(x=icon_x_pos, y=icon_y_pos + icon_size_y)
         index += 1
 
+    multiplier = 8
+    length_of_prev = multiplier
+    # This should be altered so that the spacing (what _index is multiplied by) is dependent on the length of the previous string
     for _index, stat in enumerate(displayed_stats):
-        player_name_label = customtkinter.CTkLabel(master=frame, text=stat.upper(), font=customtkinter.CTkFont(family="BankSansEFCY-Bol", size=14), text_color='#424366')
+        stat_label = customtkinter.CTkLabel(master=frame, text=stat.upper(), font=customtkinter.CTkFont(family="BankSansEFCY-Bol", size=14), text_color='#424366')
+        length_of_prev_spacing_multiplier = (length_of_prev * 4)+85
         if left_align:
-            label_x = 0 + starting_x + ((index+0.2) * icon_size_x) + ((_index*1.6) * icon_size_x)
+            label_x = 10 + starting_x + ((index) * icon_size_x) + (_index*length_of_prev_spacing_multiplier)
             label_y = 0 + starting_y + (vertical_slot * icon_size_y * playtimeBarPadding) + icon_size_y/3
-            player_name_label.place(x=label_x, y=label_y)
+            stat_label.place(x=label_x, y=label_y)
         else:
-            label_x = 1660 - icon_size_x - ((index+0.6) * icon_size_x) + starting_x - ((_index*1.6) * icon_size_x)
+            label_x = 1560 - ((index) * icon_size_x) + starting_x - (_index*length_of_prev_spacing_multiplier)
             label_y = 0 + starting_y + (vertical_slot * icon_size_y * playtimeBarPadding) + icon_size_y/3
-            player_name_label.place(x=label_x, y=label_y)
+            stat_label.place(x=label_x, y=label_y)
+        length_of_prev = len(str(stat))
 
 
-def CreateMatchGUI(icon_size_x, icon_size_y, starting_x, starting_y, match, displayPlaytimeBar, icon_type, displayed_stats):
-    for index, player in enumerate(match.players):
+def CreateMatchGUI(icon_size_x, icon_size_y, starting_x, starting_y, match, displayPlaytimeBar, icon_type, displayed_stats, display_team_name):
+
+    # Create team name
+    t1_label = customtkinter.CTkLabel(master=frame, text=match.match_stats["Team 1 Name"],font=customtkinter.CTkFont(family="BankSansEFCY-Bol", size=20),text_color='#424366')
+    t2_label = customtkinter.CTkLabel(master=frame, text=match.match_stats["Team 2 Name"],font=customtkinter.CTkFont(family="BankSansEFCY-Bol", size=20),text_color='#424366')
+
+    t1_label.place(x=200, y=25)
+    t2_label.place(x=1200, y=25)
+
+    if display_team_name:
+        index = 1
+    else:
+        index = 0
+
+    for player in match.players:
         if player.player_stats["Player Name"] != "":
             return_stats = []
             if index < 5:
@@ -293,7 +328,8 @@ def CreateMatchGUI(icon_size_x, icon_size_y, starting_x, starting_y, match, disp
                     return_stats.append(player.player_stats[item][player.player_stats["Logs Count"]-1])
                 else:
                     return_stats.append(player.player_stats[item])
-            CreatePlayerIconGUI(icon_size_x, icon_size_y, starting_x, starting_y, left_align, vertical_slot, player.player_stats["Player Name"], ParseHeroPlaytimeData(player), displayPlaytimeBar, icon_type, return_stats)
+            CreatePlayerIconGUI(icon_size_x, icon_size_y, starting_x, starting_y, left_align, vertical_slot, player.player_stats["Player Name"], ParseHeroPlaytimeData(player), displayPlaytimeBar, icon_type, return_stats, display_team_name)
+        index += 1
 
 
 def ProportionOfHeroPlayed(heroes, hero):
@@ -397,9 +433,50 @@ selectable_logs.set(log_options[0])
 log_drop_down = customtkinter.CTkOptionMenu(master=topframe, variable=selectable_logs, values=log_options, font=customtkinter.CTkFont(family="BankSansEFCY-LigCon", size=15), width=160)
 log_drop_down.place(x=0,y=58)
 
+
+def CreateGraph(player, stat_key, team_1_aligned):
+    graph_frame = customtkinter.CTkFrame(master=frame, bg_color="#C9C9C9", fg_color="#C9C9C9",width=600)
+
+    if team_1_aligned:
+        graph_frame.place(x=140, y=-140)
+    else:
+        graph_frame.place(x=840, y=-140)
+
+    x = np.arange(0,player.player_stats["Logs Count"],1)
+    y = player.player_stats[stat_key]
+
+    fig, ax = plt.subplots()
+    plt.subplots_adjust(top=0.355, right=1.2)
+    plt.plot(x, y)
+    # plt.ylim(0, 90)
+    # _min = min(y)
+    _max = 0
+
+    for data_point in range(player.player_stats["Logs Count"]):
+        float_var = float(player.player_stats[stat_key][data_point])
+        int_var = int(float_var)
+        if int_var > _max:
+            _max = math.floor(int_var)
+
+    # plt.locator_params(axis='y', nbins=4)
+    ax.yaxis.set_major_locator(plt.MaxNLocator(5))
+    # plt.ylim(ymax=10)
+    # plt.yticks(np.linspace(0, _max, 10))
+    plt.fill_between(x,y)
+    
+
+
+    canvas = FigureCanvasTkAgg(figure=fig, master=graph_frame)
+    canvas.get_tk_widget().pack()
+
+
+
+CreateGraph(match1.team1player1, "Hero Damage Dealt", True)
+CreateGraph(match1.team2player1, "Hero Damage Dealt", False)
+
 displayed_stats = ["Player Name", "Hero Damage Dealt", "Healing Dealt"]
 
-CreateMatchGUI(60, 60, 0, 0, match1, True, "Silhouette", displayed_stats)
+CreateMatchGUI(60, 60, 0, 0, match1, True, "Silhouette", displayed_stats, True)
 
 root.mainloop()
 
