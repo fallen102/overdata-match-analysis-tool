@@ -94,6 +94,7 @@ class Match:
         self.match_stats = {"Map": "", "Players": list(), "Match Round": list(),
                             "Array Of Living Players Team 1": list(), "Array Of Living Players Team 2": list(),
                             "Array Of Dead Players Team 1": list(), "Array Of Dead Players Team 2": list(),
+                            "Number Of Living Players Team 1": list(), "Number Of Living Players Team 2": list(),
                             "Team Score Team 1": list(), "Team Score Team 2": list(), "Gamemode": "",
                             "Time Elapsed": list(), "Control Mode Score Percentage Team 1": list(),
                             "Control Mode Score Percentage Team 2": list(), "Is Control Point Locked?": list(),
@@ -102,41 +103,50 @@ class Match:
                             "Payload Progress Percentage": list(), "Objective Index": list(),
                             "Point Capture Percentage": list(), "Push Bot X Position": list(),
                             "Push Bot Y Position": list(), "Push Bot Z Position": list(),
-                            "Push Percentage": list(), "Match Time Elapsed": list()}
+                            "Push Percentage": list(), "Match Time Elapsed": list(),
+                            "Time Between Global Logs": 2, "Time Between T1P1 Player Log": 1,
+                            "Team 1 Name": "", "Team 2 Name": ""}
         # ^ Push Percentage is yet to be implemented
 
-        # Determining the map for a given file passed in
         self.modified = []
         self.file = open("Logs/" + file, "r")
         self.read = self.file.readlines()
 
-        for line in self.read:
-            if line[-1] == '\n':
-                self.modified.append(line[11:])
-            self.match_stats["Map"] = self.modified[0]
-            for index, char in enumerate(self.match_stats["Map"]):
-                if char == ",":
-                    len_of_mapline = len(self.match_stats["Map"])
-                    index_of_end_map = index
-                    self.match_stats["Map"] = self.match_stats["Map"][:-(len_of_mapline - index)]
-                    break
+        split = self.read[0].split(",")
+        self.match_stats["Map"] = split[0]
+        self.match_stats["Team 1 Name"] = split[1]
+        self.match_stats["Team 2 Name"] = split[2]
+        self.match_stats["Time Between Global Logs"] = split[3]
+        self.match_stats["Time Between T1P1 Player Log"] = split[4]
 
-        # Determing gamemode info from gamemode logs (one of the two non-player logs)
         for index, line in enumerate(self.read):
             split = line.split(",")
-            if line.__contains__("INFORMATION LOG"):
-                # Logic for information log
-                self.match_stats["Match Round"].append(split[0].split(" ")[1])
-                self.match_stats["Array Of Living Players Team 1"].append(split[3])
-                self.match_stats["Array Of Living Players Team 2"].append(split[4])
-                self.match_stats["Array Of Dead Players Team 1"].append(split[5])
-                self.match_stats["Array Of Dead Players Team 2"].append(split[6])
-                self.match_stats["Team Score Team 1"].append(split[7])
-                self.match_stats["Team Score Team 2"].append(split[8])
-                self.match_stats["Team 1 Name"] = split[10]
-                self.match_stats["Team 2 Name"] = split[11]
-            elif not line.__contains__("PLAYER LOG") and index > 1:
-                # Logic for game mode log
+            if line.__contains__("Information Log"):
+                # "Minimum" gamemode logging setting
+                if split[0].split(" ")[1] == 0:
+                    self.match_stats["Match Round"].append(split[1])
+                    self.match_stats["Team Score Team 1"].append(split[2])
+                    self.match_stats["Team Score Team 2"].append(split[3])
+                # "Performance" gamemode logging setting
+                elif split[0].split(" ")[1] == 1:
+                    self.match_stats["Match Round"].append(split[1])
+                    self.match_stats["Number Of Living Players Team 1"].append(split[2])
+                    self.match_stats["Number Of Living Players Team 2"].append(split[3])
+                    self.match_stats["Team Score Team 1"].append(split[4])
+                    self.match_stats["Team Score Team 2"].append(split[5])
+                elif split[0].split(" ")[1] == 2:
+                # "Maximum" gamemode logging setting
+                    self.match_stats["Match Round"].append(split[1])
+                    # These array entries will need to be reconfigured a bit here once you have a working log to test with, because the individual items of the array will be comma-separated
+                    self.match_stats["Array Of Living Players Team 1"].append(split[2])
+                    self.match_stats["Array Of Living Players Team 2"].append(split[3])
+                    self.match_stats["Array Of Dead Players Team 1"].append(split[4])
+                    self.match_stats["Array Of Dead Players Team 2"].append(split[5])
+                    self.match_stats["Team Score Team 1"].append(split[6])
+                    self.match_stats["Team Score Team 2"].append(split[7])
+            elif line.__contains__("MG Log"):
+            # This also needs to be adjusted because it will include logs for final blows and resurrects and whatnot, those should be a given a tag to check for here like "Event Log" or gm can be given "Gamemode Log"
+                # Logic for map & game mode log
                 self.match_stats["Gamemode"] = split[0].split(" ")[1]
                 self.match_stats["Match Time Elapsed"].append(split[1])
                 if self.match_stats["Gamemode"] == "Control":
@@ -183,7 +193,7 @@ class Match:
 
         # Determining which lines need to be logged and the relevant player object to log them under
         for index, line in enumerate(self.read):
-            if line.__contains__("PLAYER LOG"):
+            if line.__contains__("Player Log"):
                 split_player_var_log = line.split(",")
                 for player in self.players:
                     if split_player_var_log[1] == player.player_stats["Player Name"]:
@@ -200,12 +210,8 @@ class Player:
                              "Healing Dealt": list(), "Objective Kills": list(), "Solo Kills": list(),
                              "Ultimates Earned": list(), "Ultimates Used": list(),
                              "Healing Received": list(), "Ultimate Charge Percentage": list(),
-                             "Player Closest To Reticle": list(), "X Position": list(), "Y Position": list(),
-                             "Z Position": list(), "Team": list(), "Ability 1 Cooldown": list(),
-                             "Ability 2 Cooldown": list(), "Total Health": list(), "Max Health": list(),
-                             "Active Health": list(), "Active Armour": list(), "Active Shields": list(),
-                             "Logs Count": 0,
-                             "Player Name": playername}
+                             "Ability 1 Cooldown": list(), "Ability 2 Cooldown": list(), "Total Health": list(),
+                             "Max Health": list(), "Logs Count": 0, "Player Name": playername}
 
     def AddLog(self, line):
 
@@ -216,8 +222,8 @@ class Player:
 
         if split_player_log[2] == "LÃºcio" or split_player_log[2] == "Lúcio" or split_player_log[2] == "Lucio":
             self.player_stats["Hero"].append("Lucio")
-        elif split_player_log[2] == "Soldier:76":
-            self.player_stats["Hero"].append("Soldier 76")
+        elif split_player_log[2] == "Soldier: 76":
+            self.player_stats["Hero"].append("Soldier")
         else:
             self.player_stats["Hero"].append(split_player_log[2])
 
@@ -235,20 +241,12 @@ class Player:
         self.player_stats["Solo Kills"].append(split_player_log[14])
         self.player_stats["Ultimates Earned"].append(split_player_log[15])
         self.player_stats["Ultimates Used"].append(split_player_log[16])
-        self.player_stats["Healing Received"].append(split_player_log[17])
-        self.player_stats["Ultimate Charge Percentage"].append(split_player_log[18])
-        self.player_stats["Player Closest To Reticle"].append(split_player_log[19])
-        self.player_stats["X Position"].append(split_player_log[20][1:])
-        self.player_stats["Y Position"].append(split_player_log[21])
-        self.player_stats["Z Position"].append(split_player_log[22][:-1])
-        self.player_stats["Team"].append(split_player_log[23])
-        self.player_stats["Ability 1 Cooldown"].append(split_player_log[24])
-        self.player_stats["Ability 2 Cooldown"].append(split_player_log[25])
-        self.player_stats["Total Health"].append(split_player_log[26])
-        self.player_stats["Max Health"].append(split_player_log[27])
-        self.player_stats["Active Health"].append(split_player_log[28])
-        self.player_stats["Active Armour"].append(split_player_log[29])
-        self.player_stats["Active Shields"].append(split_player_log[30])
+        self.player_stats["Ultimate Charge Percentage"].append(split_player_log[17])
+        self.player_stats["Healing Received"].append(split_player_log[18])
+        self.player_stats["Ability 1 Cooldown"].append(split_player_log[19])
+        self.player_stats["Ability 2 Cooldown"].append(split_player_log[20])
+        self.player_stats["Total Health"].append(split_player_log[21])
+        self.player_stats["Max Health"].append(split_player_log[22])
 
 
 def CreatePlayerIconGUI(icon_size_x, icon_size_y, starting_x, starting_y, left_align, vertical_slot, playerName, heroes, displayPlaytimeBar, icon_type, displayed_stats, display_team_name):
@@ -310,7 +308,8 @@ def CreateMatchGUI(icon_size_x, icon_size_y, starting_x, starting_y, match, disp
     t2_label.place(x=1200, y=25)
 
     if display_team_name:
-        index = 1
+        index = 0
+        add_index = 1
     else:
         index = 0
 
@@ -319,10 +318,10 @@ def CreateMatchGUI(icon_size_x, icon_size_y, starting_x, starting_y, match, disp
             return_stats = []
             if index < 5:
                 left_align = True
-                vertical_slot = index
+                vertical_slot = index + add_index
             else:
                 left_align = False
-                vertical_slot = index-5
+                vertical_slot = index+add_index-5
             for item in displayed_stats:
                 if type(player.player_stats[item]) is not str:
                     return_stats.append(player.player_stats[item][player.player_stats["Logs Count"]-1])
@@ -376,18 +375,9 @@ def CreateNewPlayerDataObjectFromMatchCollection(playerName, matchCollection):
         return_player.player_stats["Ultimates Used"] += player.player_stats["Ultimates Used"]
         return_player.player_stats["Healing Received"] += player.player_stats["Healing Received"]
         return_player.player_stats["Ultimate Charge Percentage"] += player.player_stats["Ultimate Charge Percentage"]
-        return_player.player_stats["Player Closest To Reticle"] += player.player_stats["Player Closest To Reticle"]
-        return_player.player_stats["X Position"] += player.player_stats["X Position"]
-        return_player.player_stats["Y Position"] += player.player_stats["Y Position"]
-        return_player.player_stats["Z Position"] += player.player_stats["Z Position"]
-        return_player.player_stats["Team"] += player.player_stats["Team"]
         return_player.player_stats["Ability 1 Cooldown"] += player.player_stats["Ability 1 Cooldown"]
         return_player.player_stats["Ability 2 Cooldown"] += player.player_stats["Ability 2 Cooldown"]
         return_player.player_stats["Total Health"] += player.player_stats["Total Health"]
-        return_player.player_stats["Max Health"] += player.player_stats["Max Health"]
-        return_player.player_stats["Active Health"] += player.player_stats["Active Health"]
-        return_player.player_stats["Active Armour"] += player.player_stats["Active Armour"]
-        return_player.player_stats["Active Shields"] += player.player_stats["Active Shields"]
         return_player.player_stats["Logs Count"] += player.player_stats["Logs Count"]
 
     return return_player
@@ -398,22 +388,20 @@ def FindTop3(parsedHeroPlaytimeData):
     return top3list
 
 
-match1 = Match("Log-2023-04-02-17-27-33.txt")
-match2 = Match("Log-2023-04-02-16-02-30.txt")
-match3 = Match("Log-2023-04-03-15-25-56.txt")
+match1 = Match("Log-2023-04-11-14-50-34.txt")
 
-some_data_collection = [match1, match2]
+#some_data_collection = [match1, match2]
 
-morning_combined_player_object = CreateNewPlayerDataObjectFromMatchCollection("morning", some_data_collection)
-coronet_combined_player_object = CreateNewPlayerDataObjectFromMatchCollection("Coronet", some_data_collection)
+#morning_combined_player_object = CreateNewPlayerDataObjectFromMatchCollection("morning", some_data_collection)
+#coronet_combined_player_object = CreateNewPlayerDataObjectFromMatchCollection("Coronet", some_data_collection)
 
 # morning
-t1p1_heroes = ParseHeroPlaytimeData(morning_combined_player_object)
+#t1p1_heroes = ParseHeroPlaytimeData(morning_combined_player_object)
 
 # Coronet
 # t2p1_heroes = ParseHeroPlaytimeData(match3.team2player1)
 # Above it automatically parses the data for THAT MATCH (match 3), since each match has its own of this player object and match3.player is a unique playerObject which is passed in
-t2p1_heroes = ParseHeroPlaytimeData(coronet_combined_player_object)
+#t2p1_heroes = ParseHeroPlaytimeData(coronet_combined_player_object)
 
 # CreatePlayerIconGUI(60, 60, 0, 0, True, 0, match3.team1player1.player_stats["Player Name"], t1p1_heroes, True, "Silhouette")
 # CreatePlayerIconGUI(60, 60, 0, 0, False, 0, match1.team2player1.player_stats["Player Name"], t2p1_heroes, True, "Silhouette")
@@ -471,8 +459,8 @@ def CreateGraph(player, stat_key, team_1_aligned):
 
 
 
-CreateGraph(match1.team1player1, "Hero Damage Dealt", True)
-CreateGraph(match1.team2player1, "Hero Damage Dealt", False)
+# CreateGraph(match4.team1player1, "Hero Damage Dealt", True)
+# CreateGraph(match4.team2player1, "Hero Damage Dealt", False)
 
 displayed_stats = ["Player Name", "Hero Damage Dealt", "Healing Dealt"]
 
