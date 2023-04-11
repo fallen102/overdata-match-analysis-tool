@@ -28,6 +28,12 @@ def PlayerComparisonPage():
     player_comparison_frame.pack(side="right", pady=50, padx=60, fill="both", expand=True)
 
 
+hero_colour_dict = {"Ana": "7484B5", "Ashe": "D5D9DA", "Baptiste": "189B89", "Bastion": "88A14E", "Brigitte": "B47317", "Cassidy": "873128", "D.Va": "DC60BD", "Doomfist": "5B3C28", "Echo": "74C3FC", "Genji": "B4F902",
+                    "Hanzo": "5E697F", "Junker Queen": "376CB2", "Junkrat": "DEDC93", "Kiriko": "216B5E", "Lucio": "58C633", "Mei": "4FA2FF", "Mercy": "F9F8CA", "Moira": "DB4216", "Orisa": "CAD701", "Pharah": "2A63B0",
+                    "Ramattra": "6844DA", "Reaper": "970707", "Reinhardt": "B4BDBE", "Roadhog": "E78E00", "Sigma": "24DADE", "Sojourn": "EE1B00", "Soldier": "334C8E", "Sombra": "B105BB",
+                    "Symmetra": "00B7F0", "Torbjorn": "F3543E", "Tracer": "FFA31E", "Widowmaker": "7857C0", "Winston": "444051", "Wrecking Ball": "C48C2D", "Zarya": "F160AD", "Zenyatta": "98892E"}
+
+
 customtkinter.set_appearance_mode("light")
 customtkinter.set_default_color_theme("blue")
 
@@ -58,13 +64,13 @@ left_sidebar_frame = customtkinter.CTkFrame(master=root, bg_color='#3f9ae0', fg_
 left_sidebar_frame.pack(side="left", fill="both")
 left_sidebar_frame.configure(width=140, height=1200)
 
-match_button = customtkinter.CTkButton(master=left_sidebar_frame, text_color='#ffffff', text="MATCH SUMMARY", command=MatchPage, width=140,font=customtkinter.CTkFont(family="BankSansEFCY-LigCon", size=14))
+match_button = customtkinter.CTkButton(master=left_sidebar_frame, text_color='#ffffff', text="MATCH SUMMARY", command=MatchPage, width=140)
 match_button.place(y=10)
 
-data_button = customtkinter.CTkButton(master=left_sidebar_frame, text_color='#ffffff', text="PLAYER COMPARISON", command=DataPage, width=140,font=customtkinter.CTkFont(family="BankSansEFCY-LigCon", size=14))
+data_button = customtkinter.CTkButton(master=left_sidebar_frame, text_color='#ffffff', text="PLAYER COMPARISON", command=DataPage, width=140)
 data_button.place(y=45)
 
-data_button = customtkinter.CTkButton(master=left_sidebar_frame, text_color='#ffffff', text="DATA BANK", command=DataPage, width=140, font=customtkinter.CTkFont(family="BankSansEFCY-LigCon", size=14))
+data_button = customtkinter.CTkButton(master=left_sidebar_frame, text_color='#ffffff', text="DATA BANK", command=DataPage, width=140)
 data_button.place(y=80)
 
 
@@ -176,17 +182,17 @@ class Match:
         # Creating each player object for the match based on username from the second log line
         self.new_line = self.read[1].replace("0", "")
         players_line_split = self.new_line.split(",")
-        self.team1player1 = Player(players_line_split[0].split(" ")[1])
-        self.team1player2 = Player(players_line_split[1])
-        self.team1player3 = Player(players_line_split[2])
-        self.team1player4 = Player(players_line_split[3])
-        self.team1player5 = Player(players_line_split[4])
+        self.team1player1 = Player(players_line_split[0].split(" ")[1], self.match_stats["Time Between T1P1 Player Log"])
+        self.team1player2 = Player(players_line_split[1], self.match_stats["Time Between T1P1 Player Log"])
+        self.team1player3 = Player(players_line_split[2], self.match_stats["Time Between T1P1 Player Log"])
+        self.team1player4 = Player(players_line_split[3], self.match_stats["Time Between T1P1 Player Log"])
+        self.team1player5 = Player(players_line_split[4], self.match_stats["Time Between T1P1 Player Log"])
 
-        self.team2player1 = Player(players_line_split[6])
-        self.team2player2 = Player(players_line_split[7])
-        self.team2player3 = Player(players_line_split[8])
-        self.team2player4 = Player(players_line_split[9])
-        self.team2player5 = Player(players_line_split[10])
+        self.team2player1 = Player(players_line_split[6], self.match_stats["Time Between T1P1 Player Log"])
+        self.team2player2 = Player(players_line_split[7], self.match_stats["Time Between T1P1 Player Log"])
+        self.team2player3 = Player(players_line_split[8], self.match_stats["Time Between T1P1 Player Log"])
+        self.team2player4 = Player(players_line_split[9], self.match_stats["Time Between T1P1 Player Log"])
+        self.team2player5 = Player(players_line_split[10], self.match_stats["Time Between T1P1 Player Log"])
 
         self.players = [self.team1player1, self.team1player2, self.team1player3, self.team1player4, self.team1player5,
                         self.team2player1, self.team2player2, self.team2player3, self.team2player4, self.team2player5]
@@ -202,7 +208,7 @@ class Match:
 
 class Player:
 
-    def __init__(self, playername):
+    def __init__(self, playername, time_between_player_logs):
         self.player_stats = {"Match Time Elapsed": list(), "Hero": list(), "Hero Damage Dealt": list(),
                              "Barrier Damage Dealt": list(), "Damage Mitigated": list(), "Damage Taken": list(),
                              "Deaths": list(), "Eliminations": list(),
@@ -211,7 +217,7 @@ class Player:
                              "Ultimates Earned": list(), "Ultimates Used": list(),
                              "Healing Received": list(), "Ultimate Charge Percentage": list(),
                              "Ability 1 Cooldown": list(), "Ability 2 Cooldown": list(), "Total Health": list(),
-                             "Max Health": list(), "Logs Count": 0, "Player Name": playername}
+                             "Max Health": list(), "Logs Count": 0, "Player Name": playername, "Time Between Player Logs": time_between_player_logs}
 
     def AddLog(self, line):
 
@@ -249,7 +255,7 @@ class Player:
         self.player_stats["Max Health"].append(split_player_log[22])
 
 
-def CreatePlayerIconGUI(icon_size_x, icon_size_y, starting_x, starting_y, left_align, vertical_slot, playerName, heroes, displayPlaytimeBar, icon_type, displayed_stats, display_team_name):
+def CreatePlayerIconGUI(icon_size_x, icon_size_y, starting_x, starting_y, left_align, vertical_slot, playerObject, heroes, displayPlaytimeBar, icon_type, displayed_stats, display_team_name, displayPlaytimeTextAswell):
     top3 = FindTop3(heroes)
 
     if len(top3) < 3:
@@ -260,6 +266,8 @@ def CreatePlayerIconGUI(icon_size_x, icon_size_y, starting_x, starting_y, left_a
     playtimeBarPadding = 1
     if displayPlaytimeBar:
         playtimeBarPadding = 1.2
+        if displayPlaytimeTextAswell:
+            playtimeBarPadding = 1.4
 
     for hero in top3:
         icon = customtkinter.CTkLabel(master=frame, image=FetchHeroIcon(hero, 0, 0, 0, 0, icon_type, sizex=icon_size_x, sizey=icon_size_y), text="")
@@ -279,6 +287,10 @@ def CreatePlayerIconGUI(icon_size_x, icon_size_y, starting_x, starting_y, left_a
                 round_proportion = 1
             playtimeBar = customtkinter.CTkLabel(master=frame, text="", image=FetchHeroColour(hero, round_proportion, 10), height=10, width=round_proportion)
             playtimeBar.place(x=icon_x_pos, y=icon_y_pos + icon_size_y)
+            if displayPlaytimeTextAswell:
+                minutes_played = math.ceil(proportion_of_hero_played * int(playerObject.player_stats["Logs Count"]) * int(playerObject.player_stats["Time Between Player Logs"]) / 60)
+                playtimeText = customtkinter.CTkLabel(master=frame, text=str(minutes_played) + " MINS", font=customtkinter.CTkFont(family="BankSansEFCY-Bol", size=12), text_color="#"+hero_colour_dict[hero])
+                playtimeText.place(x=icon_x_pos, y=icon_y_pos + icon_size_y + 10)
         index += 1
 
     multiplier = 8
@@ -298,7 +310,7 @@ def CreatePlayerIconGUI(icon_size_x, icon_size_y, starting_x, starting_y, left_a
         length_of_prev = len(str(stat))
 
 
-def CreateMatchGUI(icon_size_x, icon_size_y, starting_x, starting_y, match, displayPlaytimeBar, icon_type, displayed_stats, display_team_name):
+def CreateMatchGUI(icon_size_x, icon_size_y, starting_x, starting_y, match, displayPlaytimeBar, icon_type, displayed_stats, display_team_name, displayPlaytimeTextAswell):
 
     # Create team name
     t1_label = customtkinter.CTkLabel(master=frame, text=match.match_stats["Team 1 Name"],font=customtkinter.CTkFont(family="BankSansEFCY-Bol", size=20),text_color='#424366')
@@ -327,7 +339,7 @@ def CreateMatchGUI(icon_size_x, icon_size_y, starting_x, starting_y, match, disp
                     return_stats.append(player.player_stats[item][player.player_stats["Logs Count"]-1])
                 else:
                     return_stats.append(player.player_stats[item])
-            CreatePlayerIconGUI(icon_size_x, icon_size_y, starting_x, starting_y, left_align, vertical_slot, player.player_stats["Player Name"], ParseHeroPlaytimeData(player), displayPlaytimeBar, icon_type, return_stats, display_team_name)
+            CreatePlayerIconGUI(icon_size_x, icon_size_y, starting_x, starting_y, left_align, vertical_slot, player, ParseHeroPlaytimeData(player), displayPlaytimeBar, icon_type, return_stats, display_team_name, displayPlaytimeTextAswell)
         index += 1
 
 
@@ -412,14 +424,23 @@ drop_down_frame.place(x=0,y=0)
 selectable_stat = customtkinter.StringVar(frame)
 selectable_stat.set("Player Name")
 drop_down_options = ["Player Name", "Hero Damage Dealt"]
-drop_down_1 = customtkinter.CTkOptionMenu(master=topframe, variable=selectable_stat, values=drop_down_options, font=customtkinter.CTkFont(family="BankSansEFCY-LigCon", size=15), width=160)
+drop_down_1 = customtkinter.CTkOptionMenu(master=topframe, variable=selectable_stat, values=drop_down_options, width=160)
 drop_down_1.place(x=385,y=58)
 
 selectable_logs = customtkinter.StringVar(frame)
 log_options = os.listdir('Logs/')
 selectable_logs.set(log_options[0])
-log_drop_down = customtkinter.CTkOptionMenu(master=topframe, variable=selectable_logs, values=log_options, font=customtkinter.CTkFont(family="BankSansEFCY-LigCon", size=15), width=160)
+log_drop_down = customtkinter.CTkOptionMenu(master=topframe, variable=selectable_logs, values=log_options, width=160)
 log_drop_down.place(x=0,y=58)
+
+
+def DoStuff():
+    CreateMatchGUI(60, 60, 0, 0, Match(selectable_logs.get()), True, "Silhouette", displayed_stats, True, True)
+
+
+displayed_stats = ["Player Name", "Hero Damage Dealt", "Healing Dealt"]
+submit_log_button = customtkinter.CTkButton(master=topframe, command=DoStuff, text="Submit")
+submit_log_button.place(x=220, y=58)
 
 
 def CreateGraph(player, stat_key, team_1_aligned):
@@ -459,12 +480,17 @@ def CreateGraph(player, stat_key, team_1_aligned):
 
 
 
+
+
+
 # CreateGraph(match4.team1player1, "Hero Damage Dealt", True)
 # CreateGraph(match4.team2player1, "Hero Damage Dealt", False)
 
-displayed_stats = ["Player Name", "Hero Damage Dealt", "Healing Dealt"]
+# displayed_stats = ["Player Name", "Hero Damage Dealt", "Healing Dealt"]
 
-CreateMatchGUI(60, 60, 0, 0, match1, True, "Silhouette", displayed_stats, True)
+
+
+# CreateMatchGUI(60, 60, 0, 0, Match("Log-2023-04-11-14-50-34.txt"), True, "Silhouette", displayed_stats, True, True)
 
 root.mainloop()
 
