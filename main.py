@@ -39,6 +39,7 @@ customtkinter.set_default_color_theme("blue")
 
 root = customtkinter.CTk()
 root.attributes('-fullscreen', True)
+# root.wm_attributes('-transparentcolor', root['bg'])
 
 topframe = customtkinter.CTkFrame(master=root, bg_color="#4D6394", fg_color="#4D6394", height=90)
 topframe.pack(side="top", fill="both", expand=True)
@@ -72,6 +73,11 @@ data_button.place(y=45)
 
 data_button = customtkinter.CTkButton(master=left_sidebar_frame, text_color='#ffffff', text="DATA BANK", command=DataPage, width=140)
 data_button.place(y=80)
+
+
+def ClearMatchFrame():
+    for widgets in frame.winfo_children():
+        widgets.destroy()
 
 
 def FetchHeroIcon(heroName, crop_x_left, crop_x_right, crop_y_top, crop_y_bottom, icon_type, sizex=50, sizey=50):
@@ -180,7 +186,7 @@ class Match:
                     self.match_stats["Push Bot Z Position"].append(split[4][1:-3])
 
         # Creating each player object for the match based on username from the second log line
-        self.new_line = self.read[1].replace("0", "")
+        self.new_line = self.read[1]#.replace("0", "")
         players_line_split = self.new_line.split(",")
         self.team1player1 = Player(players_line_split[0].split(" ")[1], self.match_stats["Time Between T1P1 Player Log"])
         self.team1player2 = Player(players_line_split[1], self.match_stats["Time Between T1P1 Player Log"])
@@ -267,7 +273,7 @@ def CreatePlayerIconGUI(icon_size_x, icon_size_y, starting_x, starting_y, left_a
     if displayPlaytimeBar:
         playtimeBarPadding = 1.2
         if displayPlaytimeTextAswell:
-            playtimeBarPadding = 1.4
+            playtimeBarPadding = 1.52
 
     for hero in top3:
         icon = customtkinter.CTkLabel(master=frame, image=FetchHeroIcon(hero, 0, 0, 0, 0, icon_type, sizex=icon_size_x, sizey=icon_size_y), text="")
@@ -297,14 +303,21 @@ def CreatePlayerIconGUI(icon_size_x, icon_size_y, starting_x, starting_y, left_a
     length_of_prev = multiplier
     # This should be altered so that the spacing (what _index is multiplied by) is dependent on the length of the previous string
     for _index, stat in enumerate(displayed_stats):
-        stat_label = customtkinter.CTkLabel(master=frame, text=stat.upper(), font=customtkinter.CTkFont(family="BankSansEFCY-Bol", size=14), text_color='#424366')
-        length_of_prev_spacing_multiplier = (length_of_prev * 4)+85
+        size_buffer = 28 - (len(str(stat)) - 5)
+        if type(stat) == str:
+            stat_label = customtkinter.CTkLabel(master=frame, text=stat.upper(), font=customtkinter.CTkFont(family="BankSansEFCY-Bol", size=round(size_buffer / 2)), text_color='#424366')
+        else:
+            if stat != 0.0:
+                stat_label = customtkinter.CTkLabel(master=frame, text=(f"{stat:,}"), font=customtkinter.CTkFont(family="BankSansEFCY-Bol", size=round(size_buffer/2)), text_color='#424366')
+            else:
+                break
+        length_of_prev_spacing_multiplier = (length_of_prev * 4) + 90
         if left_align:
-            label_x = 10 + starting_x + ((index) * icon_size_x) + (_index*length_of_prev_spacing_multiplier)
+            label_x = 15 + starting_x + ((index) * icon_size_x) + (_index*length_of_prev_spacing_multiplier)
             label_y = 0 + starting_y + (vertical_slot * icon_size_y * playtimeBarPadding) + icon_size_y/3
             stat_label.place(x=label_x, y=label_y)
         else:
-            label_x = 1560 - ((index) * icon_size_x) + starting_x - (_index*length_of_prev_spacing_multiplier)
+            label_x = 1555 - ((index) * icon_size_x) + starting_x - (_index*length_of_prev_spacing_multiplier)
             label_y = 0 + starting_y + (vertical_slot * icon_size_y * playtimeBarPadding) + icon_size_y/3
             stat_label.place(x=label_x, y=label_y)
         length_of_prev = len(str(stat))
@@ -336,7 +349,7 @@ def CreateMatchGUI(icon_size_x, icon_size_y, starting_x, starting_y, match, disp
                 vertical_slot = index+add_index-5
             for item in displayed_stats:
                 if type(player.player_stats[item]) is not str:
-                    return_stats.append(player.player_stats[item][player.player_stats["Logs Count"]-1])
+                    return_stats.append(float(player.player_stats[item][player.player_stats["Logs Count"]-1]))
                 else:
                     return_stats.append(player.player_stats[item])
             CreatePlayerIconGUI(icon_size_x, icon_size_y, starting_x, starting_y, left_align, vertical_slot, player, ParseHeroPlaytimeData(player), displayPlaytimeBar, icon_type, return_stats, display_team_name, displayPlaytimeTextAswell)
@@ -400,8 +413,6 @@ def FindTop3(parsedHeroPlaytimeData):
     return top3list
 
 
-match1 = Match("Log-2023-04-11-14-50-34.txt")
-
 #some_data_collection = [match1, match2]
 
 #morning_combined_player_object = CreateNewPlayerDataObjectFromMatchCollection("morning", some_data_collection)
@@ -434,7 +445,10 @@ log_drop_down = customtkinter.CTkOptionMenu(master=topframe, variable=selectable
 log_drop_down.place(x=0,y=58)
 
 
+
+
 def DoStuff():
+    ClearMatchFrame()
     CreateMatchGUI(60, 60, 0, 0, Match(selectable_logs.get()), True, "Silhouette", displayed_stats, True, True)
 
 
@@ -491,6 +505,26 @@ def CreateGraph(player, stat_key, team_1_aligned):
 
 
 # CreateMatchGUI(60, 60, 0, 0, Match("Log-2023-04-11-14-50-34.txt"), True, "Silhouette", displayed_stats, True, True)
+
+
+
+
+bg = Image.open("HAVANA.png")
+bg = bg.resize((1660, 900))
+bg_pi = ImageTk.PhotoImage(bg)
+
+bg_img_label = customtkinter.CTkLabel(master=frame, text="", image=bg_pi)
+# bg_img_label.pack()
+
+
+
+
+
+
+
+
+
+
 
 root.mainloop()
 
